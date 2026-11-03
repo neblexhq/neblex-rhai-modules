@@ -139,7 +139,7 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 
 | Module | Test cases | Result in our test |
 |---|---|---|
-| data-quality | [76](data-quality/test/cases.json) | all passed |
+| data-quality | [88](data-quality/test/cases.json) | all passed |
 | dates | [43](dates/test/cases.json) | all passed |
 | numbers | [36](numbers/test/cases.json) | all passed |
 
