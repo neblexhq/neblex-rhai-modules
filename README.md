@@ -5,6 +5,10 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 | Module | What it does |
 |---|---|
 | [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails, phone numbers, names, company names, domains, US ZIP codes and states, and missing fields |
+| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and counts days between dates |
+| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes |
+
+Each module stands alone, and a Code step can import several of them at once.
 
 ## data-quality
 
@@ -37,7 +41,7 @@ Each function returns a value and changes nothing else, so you can combine them 
 
 ### Use it in a flow
 
-1. In Neblex, add a Transform Module named `data-quality` and paste in [data-quality.rhai](data-quality/data-quality.rhai). From an AI client connected to the [Neblex MCP server](https://github.com/neblexhq/neblex-mcp), you can ask it to create the module from this file instead.
+1. In Neblex, add a Transform Module named `data-quality` and paste in [data-quality.rhai](data-quality/data-quality.rhai). The other modules work the same way, named `dates` and `numbers`. From an AI client connected to the [Neblex MCP server](https://github.com/neblexhq/neblex-mcp), you can ask it to create the module from this file instead.
 2. Add a Code step, set it to **Each record**, and add `data-quality` under **Imported modules**.
 3. Call the functions in the step's script:
 
@@ -78,9 +82,68 @@ From there, a filter on `email_valid` or `missing` can send incomplete records t
 - `split_full_name` puts everything after the first word into `last_name`.
 - Rhai in Neblex has no regular expressions, so the checks are written character by character.
 
+## dates
+
+Use it when dates arrive as text in mixed formats, from spreadsheets, CSV exports, forms or older systems, and need to be one format before they're loaded.
+
+| Function | Returns | Example |
+|---|---|---|
+| `to_iso_date(v, order)` | the date as YYYY-MM-DD, or `""` when it can't be read or isn't a real date; `order` is `"mdy"` or `"dmy"` for all-number dates | `to_iso_date("04/03/2026", "mdy")` → `"2026-04-03"`, with `"dmy"` → `"2026-03-04"` |
+| `excel_serial_to_iso(v)` | the date for an Excel serial number (Excel's default 1900 date system); a time fraction is ignored | `45750` → `"2025-04-03"` |
+| `is_valid_iso_date(v)` | true when the value is exactly YYYY-MM-DD and a real date | `"2026-02-30"` → `false` |
+| `days_between(a, b)` | whole days from date `a` to date `b`, both YYYY-MM-DD | `days_between("2026-04-03", "2026-04-01")` → `-2` |
+| `is_leap_year(y)` | true for leap years | `2024` → `true`, `1900` → `false` |
+| `days_in_month(y, m)` | days in that month | `days_in_month(2024, 2)` → `29` |
+
+`to_iso_date` reads, for example, `2026-04-03`, `2026/4/3`, `20260403`, `04/03/2026`, `4/3/26`, `03.04.2026`, `3 Apr 2026`, `April 3rd, 2026`, `Fri, 3-Apr-26` and `2026-04-03T10:20:00Z`. Dates that start with a four-digit year are always read as year, month, day, and a time after the date is ignored.
+
+```rhai
+item.order_date = to_iso_date(item.order_date, "mdy");
+item.invoice_date = excel_serial_to_iso(item.invoice_date);
+item.days_open = days_between(item.order_date, item.invoice_date);
+```
+
+Limits:
+
+- An all-number date such as `04/03/2026` can't be read without knowing the source's convention, so `order` is required for those; with any other value they return `""`.
+- Two-digit years 00 to 69 become 2000 to 2069; 70 to 99 become 1970 to 1999.
+- Month names are English only. Time zones are not converted; the date is taken as written.
+
+## numbers
+
+Use it when amounts arrive as text: exports with thousands separators, European decimal commas, currency symbols, or negatives written as `(500)` or `500-`.
+
+| Function | Returns | Example |
+|---|---|---|
+| `parse_number(v, decimal_sep)` | the number, or `()` when none can be read; `decimal_sep` is `"."`, `","` or `"auto"` | `"1.234,56"` → `1234.56`, `"(500)"` → `-500.0`, `"1,234-"` → `-1234.0` |
+| `parse_percent(v, decimal_sep)` | a percentage as a fraction | `"12.5%"` → `0.125` |
+| `to_cents(v, decimal_sep)` | the amount in whole cents | `"$1,234.56"` → `123456` |
+| `currency_code(v, dollar_default)` | the ISO 4217 code from a code or symbol; a plain `$` returns `dollar_default` | `"EUR 1.234,56"` → `"EUR"`, `"R$ 50"` → `"BRL"` |
+
+```rhai
+item.currency = currency_code(item.amount_text, "USD");
+item.amount = parse_number(item.amount_text, "auto");
+item.amount_cents = to_cents(item.amount_text, "auto");
+item.discount = parse_percent(item.discount_text, "auto");
+```
+
+Limits:
+
+- With `"auto"`, a single separator followed by exactly three digits (`1,234` or `1.234`) is read as a thousands separator. If a source uses a comma for decimals with three decimal places, pass `","` instead.
+- Currency symbols, codes and units around the number are ignored; letters inside it (`12a34`) make it unreadable.
+- `to_cents` assumes two decimal places, so it doesn't fit currencies such as JPY that have none.
+
 ## Tests
 
-[data-quality/test/cases.json](data-quality/test/cases.json) has 76 test cases, each with an input and the expected result. [harness-script.rhai](data-quality/test/harness-script.rhai) is the Code step that runs them: a flow with a Webhook trigger, an Unwind step on `cases`, and this Code step (Each record, `data-quality` imported). Send `cases.json` as the payload and every output record should have `pass: true`. All 76 passed in our test.
+Each module has a `test` folder with `cases.json` (test cases, each with an input and the expected result) and `harness-script.rhai`, the Code step that runs them. To run them, build a flow with a Webhook trigger, an Unwind step on `cases`, and the harness script in a Code step set to Each record with the module imported. Send `cases.json` as the payload and every output record should have `pass: true`.
+
+| Module | Test cases | Result in our test |
+|---|---|---|
+| data-quality | [76](data-quality/test/cases.json) | all passed |
+| dates | [43](dates/test/cases.json) | all passed |
+| numbers | [36](numbers/test/cases.json) | all passed |
+
+The dates and numbers tests ran in one Code step with all three modules imported together.
 
 ## Links
 
