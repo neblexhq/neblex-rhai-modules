@@ -792,6 +792,115 @@
    "func": "is_disposable_email",
    "input": null,
    "expected": false
+  },
+  {
+   "func": "name_match_key",
+   "input": "Dr. Bob O'Neil Jr.",
+   "expected": "robert oneil"
+  },
+  {
+   "func": "name_match_key",
+   "input": "Robert ONeil",
+   "expected": "robert oneil"
+  },
+  {
+   "func": "name_match_key",
+   "input": "Smith, Bill",
+   "expected": "william smith"
+  },
+  {
+   "func": "name_match_key",
+   "input": "José  Núñez-García",
+   "expected": "jose nunez garcia"
+  },
+  {
+   "func": "name_match_key",
+   "input": "John Smith, Jr.",
+   "expected": "john smith"
+  },
+  {
+   "func": "name_match_key",
+   "input": "MRS. KATIE O'BRIEN",
+   "expected": "katherine obrien"
+  },
+  {
+   "func": "name_match_key",
+   "input": "Bob",
+   "expected": "bob"
+  },
+  {
+   "func": "name_match_key",
+   "input": "Bobby Fischer III",
+   "expected": "robert fischer"
+  },
+  {
+   "func": "name_match_key",
+   "input": "",
+   "expected": ""
+  },
+  {
+   "func": "name_match_key",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "phone_display",
+   "input": "4155550123",
+   "arg": "1",
+   "expected": "(415) 555-0123"
+  },
+  {
+   "func": "phone_display",
+   "input": "+1 (415) 555-0123 x9",
+   "arg": "1",
+   "expected": "(415) 555-0123"
+  },
+  {
+   "func": "phone_display",
+   "input": "020 7946 0958",
+   "arg": "44",
+   "expected": "+442079460958"
+  },
+  {
+   "func": "phone_display",
+   "input": "555-0123",
+   "arg": "1",
+   "expected": ""
+  },
+  {
+   "func": "website_match_key",
+   "input": "https://www.Acme.com/about",
+   "expected": "acme.com"
+  },
+  {
+   "func": "website_match_key",
+   "input": "shop.acme.com",
+   "expected": "acme.com"
+  },
+  {
+   "func": "website_match_key",
+   "input": "jane@sales.acme.com",
+   "expected": "acme.com"
+  },
+  {
+   "func": "website_match_key",
+   "input": "shop.acme.co.uk",
+   "expected": "acme.co.uk"
+  },
+  {
+   "func": "website_match_key",
+   "input": "acme.co.uk",
+   "expected": "acme.co.uk"
+  },
+  {
+   "func": "website_match_key",
+   "input": "not a site",
+   "expected": ""
+  },
+  {
+   "func": "website_match_key",
+   "input": null,
+   "expected": ""
   }
  ]
 }

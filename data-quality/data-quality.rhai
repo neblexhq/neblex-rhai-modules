@@ -594,3 +594,111 @@ fn is_disposable_email(v) {
     }
     false
 }
+
+// ---------- Match keys for people and websites ----------
+
+// Accented Latin letters in plain form ("Núñez" -> "Nunez"), used by name_match_key.
+fn fold_accents(v) {
+    let from = "ÀÁÂÃÄÅĀĂĄàáâãäåāăąÇĆČçćčĎĐďđÈÉÊËĒĖĘĚèéêëēėęěĞğÌÍÎÏĪĮİìíîïīįıĹĽŁĺľłÑŃŇñńňÒÓÔÕÖØŌŐòóôõöøōőŔŘŕřŚŠŞśšşŤťÙÚÛÜŪŮŰŲùúûüūůűųÝŸýÿŹŻŽźżž";
+    let to   = "AAAAAAAAAaaaaaaaaaCCCcccDDddEEEEEEEEeeeeeeeeGgIIIIIIIiiiiiiiLLLlllNNNnnnOOOOOOOOooooooooRRrrSSSsssTtUUUUUUUUuuuuuuuuYYyyZZZzzz";
+    let out = "";
+    for c in v {
+        let i = from.index_of(c);
+        if i >= 0 { out += to[i]; } else if c == 'ß' { out += "ss"; } else { out += c; }
+    }
+    out
+}
+
+// A key for matching people by name: "Last, First" reordered, accents, case and punctuation
+// removed, titles (Mr, Dr ...) and suffixes (Jr, III, PhD ...) dropped, and a common nickname in
+// first position replaced by the full name. "Dr. Bob O'Neil Jr." and "Robert ONeil" both give
+// "robert oneil". Missing values give "".
+fn name_match_key(v) {
+    if type_of(v) != "string" { return ""; }
+    let s = clean_text(v);
+    let comma = s.index_of(',');
+    if comma > 0 {
+        let after = s.sub_string(comma + 1);
+        after.trim();
+        // "Smith, John" but not "John Smith, Jr."
+        let low = after.to_lower();
+        low.replace(".", "");
+        if !["jr", "sr", "ii", "iii", "iv", "phd", "md", "esq"].contains(low) {
+            s = after + " " + s.sub_string(0, comma);
+        }
+    }
+    let plain = "";
+    for c in fold_accents(s).to_lower() {
+        if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') {
+            plain += c;
+        } else if c == ' ' || c == '-' || c == ',' || c == '\t' {
+            plain += " ";
+        }
+        // Apostrophes and periods are dropped: "O'Neil" -> "oneil", "J.R." -> "jr".
+    }
+    let words = [];
+    for w in plain.split(" ") {
+        if w != "" { words.push(w); }
+    }
+    let titles = ["mr", "mrs", "ms", "miss", "mx", "dr", "prof", "sir", "madam"];
+    while words.len() > 1 && titles.contains(words[0]) { words.remove(0); }
+    let suffixes = ["jr", "sr", "ii", "iii", "iv", "phd", "md", "esq", "dds", "cpa"];
+    while words.len() > 1 && suffixes.contains(words[words.len() - 1]) { words.pop(); }
+    if words.len() == 0 { return ""; }
+    let nicknames = #{
+        "bob": "robert", "bobby": "robert", "rob": "robert", "robby": "robert", "bill": "william", "billy": "william",
+        "will": "william", "willy": "william", "liz": "elizabeth", "lizzy": "elizabeth", "beth": "elizabeth",
+        "betty": "elizabeth", "jim": "james", "jimmy": "james", "mike": "michael", "mikey": "michael",
+        "kate": "katherine", "katie": "katherine", "kathy": "katherine", "tom": "thomas", "tommy": "thomas",
+        "dick": "richard", "rick": "richard", "ricky": "richard", "rich": "richard", "chris": "christopher",
+        "dave": "david", "dan": "daniel", "danny": "daniel", "joe": "joseph", "joey": "joseph", "tony": "anthony",
+        "alex": "alexander", "sam": "samuel", "steve": "steven", "matt": "matthew", "nick": "nicholas",
+        "ben": "benjamin", "ed": "edward", "eddie": "edward", "jen": "jennifer", "jenny": "jennifer",
+        "meg": "margaret", "maggie": "margaret", "peggy": "margaret", "sue": "susan", "susie": "susan",
+        "andy": "andrew", "greg": "gregory", "jeff": "jeffrey", "ron": "ronald", "don": "donald",
+        "larry": "lawrence", "chuck": "charles", "charlie": "charles", "hank": "henry", "johnny": "john",
+        "abby": "abigail", "becky": "rebecca", "vicky": "victoria", "pam": "pamela", "deb": "deborah",
+        "debbie": "deborah", "tim": "timothy", "fred": "frederick", "josh": "joshua", "zach": "zachary"
+    };
+    if words.len() > 1 && nicknames.contains(words[0]) { words[0] = nicknames[words[0]]; }
+    let out = "";
+    for w in words {
+        if out.len() > 0 { out += " "; }
+        out += w;
+    }
+    out
+}
+
+// A phone number formatted for people to read: US and Canadian numbers as "(415) 555-0123",
+// others in E.164 ("+442079460958"). `default_cc` works as in phone_e164. Returns "" when the
+// number can't be valid.
+fn phone_display(v, default_cc) {
+    let e = phone_e164(v, default_cc);
+    if e.starts_with("+1") && e.len() == 12 {
+        return "(" + e.sub_string(2, 3) + ") " + e.sub_string(5, 3) + "-" + e.sub_string(8, 4);
+    }
+    e
+}
+
+// A key for matching companies by website: the registrable domain, so "https://www.acme.com/about",
+// "shop.acme.com" and "jane@acme.com" all give "acme.com", and "shop.acme.co.uk" gives
+// "acme.co.uk". Returns "" when there is no valid domain.
+fn website_match_key(v) {
+    let d = domain_from_url(v);
+    if !is_valid_domain(d) { return ""; }
+    let labels = d.split(".");
+    let n = labels.len();
+    if n <= 2 { return d; }
+    let last_two = labels[n - 2] + "." + labels[n - 1];
+    let two_part = [
+        "co.uk", "org.uk", "ac.uk", "gov.uk", "me.uk", "com.au", "net.au", "org.au", "co.nz", "org.nz",
+        "co.jp", "co.za", "com.br", "com.mx", "co.in", "com.sg", "com.cn", "co.kr", "com.tr", "com.ar"
+    ];
+    let keep = if two_part.contains(last_two) { 3 } else { 2 };
+    let out = "";
+    for i in (n - keep)..n {
+        if out.len() > 0 { out += "."; }
+        out += labels[i];
+    }
+    out
+}

@@ -6,12 +6,12 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 
 | Module | What it does |
 |---|---|
-| [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails (including disposable addresses), phone numbers, names, company names, domains, URLs, US ZIP codes and states, Canadian and UK postcodes, country codes, Luhn check digits and missing fields |
+| [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails (including disposable addresses), phone numbers, names, company names, domains, URLs, US ZIP codes and states, Canadian and UK postcodes, country codes, Luhn check digits, match keys for people and websites, and missing fields |
 | [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week, end of month, quarter, fiscal year and quarter, months and ages |
 | [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change, safe division and durations |
 | [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets, count words, and title, snake and camel case |
 
-65 functions in all.
+68 functions in all.
 
 Each module stands alone, and a Code step can import several of them at once.
 
@@ -47,6 +47,9 @@ Use it to clean records before they reach a CRM, ERP or warehouse, and to build 
 | `ca_postal_code(v)` | a Canadian postal code as `A1A 1A1`, or `""` when it can't be one | `"v6b4n8"` → `"V6B 4N8"` |
 | `uk_postcode(v)` | a UK postcode as `OUTWARD INWARD`, or `""` when the format is wrong | `"sw1a1aa"` → `"SW1A 1AA"` |
 | `is_disposable_email(v)` | true for well-known throwaway email services and their subdomains | `"x@mailinator.com"` → `true` |
+| `name_match_key(v)` | a key for matching people: "Last, First" reordered, accents, punctuation, titles and suffixes removed, common nicknames expanded | `"Dr. Bob O'Neil Jr."` and `"Robert ONeil"` → `"robert oneil"` |
+| `phone_display(v, default_cc)` | a phone number for people to read: US and Canada as `(415) 555-0123`, others in E.164 | `phone_display("4155550123", "1")` → `"(415) 555-0123"` |
+| `website_match_key(v)` | the registrable domain of a website or email address | `"shop.acme.co.uk"` → `"acme.co.uk"`, `"jane@sales.acme.com"` → `"acme.com"` |
 | `missing_fields(record, fields)` | the listed fields that are missing or blank | `["company", "phone"]` |
 | `completeness(record, fields)` | share of the listed fields that are filled in, 0.0 to 1.0 | `0.67` |
 
@@ -93,6 +96,7 @@ From there, a filter on `email_valid` or `missing` can send incomplete records t
 - `phone_e164` checks length and, for +1 numbers, the area code and exchange. It doesn't know every country's numbering plan.
 - `title_case_name` capitalizes every part, including particles such as "van" or "de".
 - `split_full_name` puts everything after the first word into `last_name`.
+- `name_match_key` knows about 80 common English nicknames (Bob, Bill, Liz, Katie ...) and only expands the first word; a single word is kept as written.
 - Rhai in Neblex has no regular expressions, so the checks are written character by character.
 
 ## dates
@@ -209,12 +213,12 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 
 | Module | Test cases | Result in our test |
 |---|---|---|
-| data-quality | [143](data-quality/test/cases.json) | all passed |
+| data-quality | [164](data-quality/test/cases.json) | all passed |
 | dates | [132](dates/test/cases.json) | all passed |
 | numbers | [89](numbers/test/cases.json) | all passed |
 | text | [57](text/test/cases.json) | all passed |
 
-All 421 cases pass in a Code step with the four modules imported together.
+All 442 cases pass in a Code step with the four modules imported together.
 
 The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all four loaded together. To run them yourself from the repository root, with Rust installed:
 
