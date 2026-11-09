@@ -296,3 +296,86 @@ fn camel_case(v) {
     }
     out
 }
+
+// Lowercase words joined by hyphens, for URLs, CSS classes and file names:
+// "Customer First Name" -> "customer-first-name", "orderID" -> "order-id". Missing values become "".
+fn kebab_case(v) {
+    let out = "";
+    for w in split_words(v) {
+        if out.len() > 0 { out += "-"; }
+        out += w;
+    }
+    out
+}
+
+// The #hashtags and @mentions in a text, without the symbol, each listed once in the order they
+// first appear: "Loving #Neblex! cc @jane_doe #neblex" -> #{ hashtags: ["Neblex"], mentions: ["jane_doe"] }.
+// Email addresses aren't mentions, and tags need at least one letter (so "#1" and "&#39;" are skipped).
+fn extract_hashtags_mentions(v) {
+    let tags = [];
+    let mentions = [];
+    if type_of(v) != "string" { return #{ hashtags: tags, mentions: mentions }; }
+    let chars = [];
+    for c in v { chars.push(c); }
+    let n = chars.len();
+    let seen = [];
+    let i = 0;
+    while i < n {
+        let c = chars[i];
+        let prev_ok = i == 0 || !(chars[i - 1].to_upper() != chars[i - 1].to_lower() || (chars[i - 1] >= '0' && chars[i - 1] <= '9') || chars[i - 1] == '_' || chars[i - 1] == '&');
+        if (c == '#' || c == '@') && prev_ok {
+            let j = i + 1;
+            let word = "";
+            let has_letter = false;
+            while j < n {
+                let d = chars[j];
+                let letter = d.to_upper() != d.to_lower();
+                let ok = letter || (d >= '0' && d <= '9') || d == '_' || (c == '@' && (d == '.' || d == '-'));
+                if !ok { break; }
+                if letter { has_letter = true; }
+                word += d;
+                j += 1;
+            }
+            // A mention can't end with "." or "-" (end of a sentence).
+            while word.ends_with(".") || word.ends_with("-") { word = word.sub_string(0, word.len() - 1); }
+            if has_letter && word.len() > 0 {
+                let key = c.to_string() + word.to_lower();
+                if !seen.contains(key) {
+                    seen.push(key);
+                    if c == '#' { tags.push(word); } else { mentions.push(word); }
+                }
+            }
+            i = j;
+            continue;
+        }
+        i += 1;
+    }
+    #{ hashtags: tags, mentions: mentions }
+}
+
+// Typographic characters replaced with plain ASCII: curly quotes and primes with ' and ", dashes and
+// the minus sign with -, the ellipsis with ..., no-break and thin spaces with a space, and invisible
+// zero-width characters removed. Useful before matching or sending text to systems that mangle them.
+// Values that aren't text are returned unchanged.
+fn normalize_quotes(v) {
+    if type_of(v) != "string" { return v; }
+    let out = "";
+    for c in v {
+        if c == '‘' || c == '’' || c == '‚' || c == '‛' || c == '′' {
+            out += "'";
+        } else if c == '“' || c == '”' || c == '„' || c == '‟' || c == '″' || c == '«' || c == '»' {
+            out += "\"";
+        } else if c == '–' || c == '—' || c == '―' || c == '−' || c == '‐' || c == '‑' {
+            out += "-";
+        } else if c == '…' {
+            out += "...";
+        } else if c == '\u00A0' || c == '\u2009' || c == '\u202F' || c == '\u2007' {
+            out += " ";
+        } else if c == '\u200B' || c == '\uFEFF' || c == '\u200C' || c == '\u200D' {
+            continue;
+        } else {
+            out += c;
+        }
+    }
+    out
+}

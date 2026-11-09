@@ -312,6 +312,98 @@
     "http",
     "server2"
    ]
+  },
+  {
+   "func": "kebab_case",
+   "input": "Customer First Name",
+   "expected": "customer-first-name"
+  },
+  {
+   "func": "kebab_case",
+   "input": "orderID",
+   "expected": "order-id"
+  },
+  {
+   "func": "kebab_case",
+   "input": "already-kebab",
+   "expected": "already-kebab"
+  },
+  {
+   "func": "kebab_case",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "extract_hashtags_mentions",
+   "input": "Loving #Neblex! cc @jane_doe #neblex",
+   "expected": {
+    "hashtags": [
+     "Neblex"
+    ],
+    "mentions": [
+     "jane_doe"
+    ]
+   }
+  },
+  {
+   "func": "extract_hashtags_mentions",
+   "input": "Email jane@acme.com or ping @ops.team. Ticket #1 &#39; #Q4_2026",
+   "expected": {
+    "hashtags": [
+     "Q4_2026"
+    ],
+    "mentions": [
+     "ops.team"
+    ]
+   }
+  },
+  {
+   "func": "extract_hashtags_mentions",
+   "input": "no tags here",
+   "expected": {
+    "hashtags": [],
+    "mentions": []
+   }
+  },
+  {
+   "func": "extract_hashtags_mentions",
+   "input": null,
+   "expected": {
+    "hashtags": [],
+    "mentions": []
+   }
+  },
+  {
+   "func": "extract_hashtags_mentions",
+   "input": "#café and @José",
+   "expected": {
+    "hashtags": [
+     "café"
+    ],
+    "mentions": [
+     "José"
+    ]
+   }
+  },
+  {
+   "func": "normalize_quotes",
+   "input": "“Smart” quotes ‘here’ — and an ellipsis…",
+   "expected": "\"Smart\" quotes 'here' - and an ellipsis..."
+  },
+  {
+   "func": "normalize_quotes",
+   "input": "10 000​ − 5",
+   "expected": "10 000 - 5"
+  },
+  {
+   "func": "normalize_quotes",
+   "input": "plain",
+   "expected": "plain"
+  },
+  {
+   "func": "normalize_quotes",
+   "input": 7,
+   "expected": 7
   }
  ]
 }

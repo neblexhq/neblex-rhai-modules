@@ -9,9 +9,9 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 | [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails (including disposable addresses), phone numbers, names, company names, domains, URLs, US ZIP codes and states, Canadian and UK postcodes, country codes, Luhn check digits, match keys for people and websites, and missing fields |
 | [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week, end of month, quarter, fiscal year and quarter, months and ages |
 | [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change, safe division, durations, currency rounding, amounts in words and clamping |
-| [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets, count words, and title, snake and camel case |
+| [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets, count words, title, snake, camel and kebab case, hashtags and mentions, and typographic quotes and dashes to plain text |
 
-71 functions in all.
+74 functions in all.
 
 Each module stands alone, and a Code step can import several of them at once.
 
@@ -194,6 +194,9 @@ Use it for everyday text clean-up before values reach another system: URL slugs 
 | `title_case(v)` | each word capitalized, separated by spaces | `"customer_first_name"` → `"Customer First Name"` |
 | `snake_case(v)` | lowercase words joined by underscores | `"Total Amount (USD)"` → `"total_amount_usd"` |
 | `camel_case(v)` | words joined, each after the first capitalized | `"ORDER_ID"` → `"orderId"` |
+| `kebab_case(v)` | lowercase words joined by hyphens | `"Customer First Name"` → `"customer-first-name"` |
+| `extract_hashtags_mentions(v)` | the #hashtags and @mentions, each once, without the symbol (email addresses are skipped) | `"Loving #Neblex! cc @jane_doe"` → `#{hashtags: ["Neblex"], mentions: ["jane_doe"]}` |
+| `normalize_quotes(v)` | curly quotes, dashes, ellipses and special spaces as plain ASCII; zero-width characters removed | `"“Smart” quotes — here…"` → `"\"Smart\" quotes - here..."` |
 | `split_words(v)` | the lowercase words of a label, split at spaces, punctuation and case changes | `"HTTPServer2"` → `["http", "server2"]` |
 
 ```rhai
@@ -219,9 +222,9 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 | data-quality | [164](data-quality/test/cases.json) | all passed |
 | dates | [132](dates/test/cases.json) | all passed |
 | numbers | [110](numbers/test/cases.json) | all passed |
-| text | [57](text/test/cases.json) | all passed |
+| text | [70](text/test/cases.json) | all passed |
 
-All 463 cases pass in a Code step with the four modules imported together.
+All 476 cases pass in a Code step with the four modules imported together.
 
 The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all four loaded together. To run them yourself from the repository root, with Rust installed:
 
