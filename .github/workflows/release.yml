@@ -1,0 +1,44 @@
+# Publishes a release when a version tag (v1.2.3) is pushed: runs every module's test cases with
+# the Rhai engine, then creates the release with each module's .rhai file attached and SHA256SUMS.
+# Release notes come from .github/release-notes/<tag>.md when that file exists.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Run the test cases
+        run: cargo run --release --locked --manifest-path test-runner/Cargo.toml
+
+      - name: Collect the modules
+        run: |
+          mkdir -p dist
+          for f in */*.rhai; do
+            case "$f" in */test/*) continue ;; esac
+            cp "$f" dist/
+          done
+          cd dist && sha256sum *.rhai > SHA256SUMS && cat SHA256SUMS
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          notes=".github/release-notes/$TAG.md"
+          if [ -f "$notes" ]; then
+            gh release create "$TAG" --title "$TAG" --notes-file "$notes" dist/*.rhai dist/SHA256SUMS
+          else
+            gh release create "$TAG" --title "$TAG" --generate-notes dist/*.rhai dist/SHA256SUMS
+          fi
