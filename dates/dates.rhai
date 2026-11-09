@@ -308,3 +308,52 @@ fn unix_to_iso(v) {
 fn pad2(x) {
     if x < 10 { "0" + x } else { x.to_string() }
 }
+
+// The calendar quarter (1-4) of a YYYY-MM-DD date. Returns () when the date isn't valid.
+fn quarter(date) {
+    if !is_valid_iso_date(date) { return (); }
+    (parse_int(date.sub_string(5, 2)) - 1) / 3 + 1
+}
+
+// The fiscal year of a YYYY-MM-DD date, for a fiscal year that starts in `start_month` (1-12),
+// named by the calendar year it ends in: with start_month 10, 2026-11-09 is in fiscal 2027 and
+// 2026-09-30 in fiscal 2026. With start_month 1 it is the calendar year.
+// Returns () when the date or month isn't valid.
+fn fiscal_year(date, start_month) {
+    if !is_valid_iso_date(date) || type_of(start_month) != "i64" || start_month < 1 || start_month > 12 { return (); }
+    let y = parse_int(date.sub_string(0, 4));
+    let m = parse_int(date.sub_string(5, 2));
+    if start_month == 1 || m < start_month { y } else { y + 1 }
+}
+
+// The fiscal quarter (1-4) of a YYYY-MM-DD date for a fiscal year that starts in `start_month`:
+// with start_month 10, November is in Q1 and September in Q4. Returns () when invalid.
+fn fiscal_quarter(date, start_month) {
+    if !is_valid_iso_date(date) || type_of(start_month) != "i64" || start_month < 1 || start_month > 12 { return (); }
+    let m = parse_int(date.sub_string(5, 2));
+    ((m - start_month + 12) % 12) / 3 + 1
+}
+
+// Working days (Monday to Friday) from date a to date b, counted the way add_business_days
+// steps: forward, the weekdays after a up to and including b; backward, the weekdays from b up to
+// but not including a, as a negative number. So add_business_days(a, n) lands on b when b is a
+// weekday and this returns n. Public holidays aren't known. Returns () when either date isn't valid.
+fn business_days_between(a, b) {
+    if !is_valid_iso_date(a) || !is_valid_iso_date(b) { return (); }
+    let da = iso_to_days(a);
+    let db = iso_to_days(b);
+    if db >= da { weekdays_after(da, db) } else { -weekdays_after(db - 1, da - 1) }
+}
+
+// The number of weekdays in the days after `lo` up to and including `hi` (days since 1970-01-01).
+fn weekdays_after(lo, hi) {
+    let days = hi - lo;
+    let count = (days / 7) * 5;
+    let d = lo + (days / 7) * 7;
+    while d < hi {
+        d += 1;
+        let w = ((d + 3) % 7 + 7) % 7;
+        if w < 5 { count += 1; }
+    }
+    count
+}

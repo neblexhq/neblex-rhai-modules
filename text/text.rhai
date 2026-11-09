@@ -224,3 +224,75 @@ fn word_count(v) {
     }
     count
 }
+
+// The words in a label or field name, split at spaces, punctuation and case changes:
+// "customerFirstName", "customer_first_name" and "Customer First Name" all give
+// ["customer", "first", "name"] (lowercase). "HTTPServer2" gives ["http", "server2"].
+fn split_words(v) {
+    let words = [];
+    if type_of(v) == "()" { return words; }
+    let chars = [];
+    for c in v.to_string() { chars.push(c); }
+    let n = chars.len();
+    let w = "";
+    for i in 0..n {
+        let c = chars[i];
+        let is_letter = c.to_upper() != c.to_lower();
+        let is_digit = c >= '0' && c <= '9';
+        if !is_letter && !is_digit {
+            if w.len() > 0 { words.push(w.to_lower()); w = ""; }
+            continue;
+        }
+        if is_letter && w.len() > 0 {
+            let prev = chars[i - 1];
+            let prev_lower = prev.to_upper() != prev.to_lower() && prev == prev.to_lower();
+            let prev_upper = prev.to_upper() != prev.to_lower() && prev == prev.to_upper();
+            let upper = c == c.to_upper();
+            let next_lower = i + 1 < n && chars[i + 1].to_upper() != chars[i + 1].to_lower() && chars[i + 1] == chars[i + 1].to_lower();
+            // "nameX" splits before X; "HTTPServer" splits before the S of "Server".
+            if upper && (prev_lower || (prev_upper && next_lower)) {
+                words.push(w.to_lower());
+                w = "";
+            }
+        }
+        w += c;
+    }
+    if w.len() > 0 { words.push(w.to_lower()); }
+    words
+}
+
+// Each word capitalized and separated by a space: "customer_first_name" -> "Customer First Name",
+// "orderID" -> "Order Id". Missing values become "".
+fn title_case(v) {
+    let out = "";
+    for w in split_words(v) {
+        if out.len() > 0 { out += " "; }
+        out += w.sub_string(0, 1).to_upper() + w.sub_string(1);
+    }
+    out
+}
+
+// Lowercase words joined by underscores, for column and field names:
+// "Customer First Name" -> "customer_first_name", "orderID" -> "order_id". Missing values become "".
+fn snake_case(v) {
+    let out = "";
+    for w in split_words(v) {
+        if out.len() > 0 { out += "_"; }
+        out += w;
+    }
+    out
+}
+
+// Words joined with each word after the first capitalized, for JSON keys:
+// "customer first name" -> "customerFirstName", "ORDER_ID" -> "orderId". Missing values become "".
+fn camel_case(v) {
+    let out = "";
+    for w in split_words(v) {
+        if out.len() == 0 {
+            out += w;
+        } else {
+            out += w.sub_string(0, 1).to_upper() + w.sub_string(1);
+        }
+    }
+    out
+}

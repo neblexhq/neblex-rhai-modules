@@ -672,6 +672,126 @@
    "func": "country_code",
    "input": "People's Republic of China",
    "expected": "CN"
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "v6b4n8",
+   "expected": "V6B 4N8"
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "K1A 0B1",
+   "expected": "K1A 0B1"
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "K1A-0B1",
+   "expected": "K1A 0B1"
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "D1A 1A1",
+   "expected": ""
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "W1A 1A1",
+   "expected": ""
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "V6B 4N",
+   "expected": ""
+  },
+  {
+   "func": "ca_postal_code",
+   "input": "123456",
+   "expected": ""
+  },
+  {
+   "func": "ca_postal_code",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "uk_postcode",
+   "input": "sw1a1aa",
+   "expected": "SW1A 1AA"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "m1 1ae",
+   "expected": "M1 1AE"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "B33 8TH",
+   "expected": "B33 8TH"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "CR2 6XH",
+   "expected": "CR2 6XH"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "DN55 1PT",
+   "expected": "DN55 1PT"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "EC1A 1BB",
+   "expected": "EC1A 1BB"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "gir 0aa",
+   "expected": "GIR 0AA"
+  },
+  {
+   "func": "uk_postcode",
+   "input": "SW1A 1AC",
+   "expected": ""
+  },
+  {
+   "func": "uk_postcode",
+   "input": "12345",
+   "expected": ""
+  },
+  {
+   "func": "uk_postcode",
+   "input": "SW1A1A",
+   "expected": ""
+  },
+  {
+   "func": "uk_postcode",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "is_disposable_email",
+   "input": "x@mailinator.com",
+   "expected": true
+  },
+  {
+   "func": "is_disposable_email",
+   "input": "X@eu.Mailinator.com",
+   "expected": true
+  },
+  {
+   "func": "is_disposable_email",
+   "input": "x@gmail.com",
+   "expected": false
+  },
+  {
+   "func": "is_disposable_email",
+   "input": "x@notmailinator.com",
+   "expected": false
+  },
+  {
+   "func": "is_disposable_email",
+   "input": null,
+   "expected": false
   }
  ]
 }

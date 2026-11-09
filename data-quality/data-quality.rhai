@@ -522,3 +522,75 @@ fn luhn_valid(v) {
     }
     sum % 10 == 0
 }
+
+// ---------- Postcodes outside the US ----------
+
+// A Canadian postal code as "A1A 1A1": "v6b4n8" -> "V6B 4N8". Returns "" when it can't be one
+// (wrong pattern, or letters Canada Post doesn't use: D, F, I, O, Q, U, and W or Z first).
+fn ca_postal_code(v) {
+    if type_of(v) == "()" { return ""; }
+    let s = "";
+    for c in v.to_string().to_upper() {
+        if c != ' ' && c != '-' { s += c; }
+    }
+    if s.len() != 6 { return ""; }
+    let banned = "DFIOQU";
+    for i in 0..6 {
+        let c = s[i];
+        let letter = c >= 'A' && c <= 'Z';
+        let digit = c >= '0' && c <= '9';
+        if i % 2 == 0 {
+            if !letter || banned.contains(c) { return ""; }
+        } else if !digit {
+            return "";
+        }
+    }
+    if s[0] == 'W' || s[0] == 'Z' { return ""; }
+    s.sub_string(0, 3) + " " + s.sub_string(3)
+}
+
+// A UK postcode as "OUTWARD INWARD": "sw1a1aa" -> "SW1A 1AA", "m1 1ae" -> "M1 1AE". Checks the
+// standard shapes (A9, A99, AA9, AA99, A9A, AA9A, then 9AA). Returns "" when it can't be one.
+// It checks the format only, not that the postcode exists.
+fn uk_postcode(v) {
+    if type_of(v) == "()" { return ""; }
+    let s = "";
+    for c in v.to_string().to_upper() {
+        if c != ' ' && c != '-' { s += c; }
+    }
+    if s == "GIR0AA" { return "GIR 0AA"; }
+    if s.len() < 5 || s.len() > 7 { return ""; }
+    let outward = s.sub_string(0, s.len() - 3);
+    let inward = s.sub_string(s.len() - 3);
+    // Inward: a digit, then two letters other than C, I, K, M, O, V.
+    if inward[0] < '0' || inward[0] > '9' { return ""; }
+    for i in 1..3 {
+        let c = inward[i];
+        if c < 'A' || c > 'Z' || "CIKMOV".contains(c) { return ""; }
+    }
+    // Outward shape as a pattern of L (letter) and D (digit).
+    let shape = "";
+    for c in outward {
+        shape += if c >= 'A' && c <= 'Z' { "L" } else if c >= '0' && c <= '9' { "D" } else { "?" };
+    }
+    if !["LD", "LDD", "LLD", "LLDD", "LDL", "LLDL"].contains(shape) { return ""; }
+    outward + " " + inward
+}
+
+// True for addresses at common disposable (throwaway) email services, such as mailinator.com or
+// 10minutemail.com, including their subdomains. The list covers well-known services, not all of them.
+fn is_disposable_email(v) {
+    let d = email_domain(v);
+    if d == "" { return false; }
+    let disposable = [
+        "mailinator.com", "guerrillamail.com", "guerrillamail.net", "sharklasers.com", "10minutemail.com",
+        "tempmail.com", "temp-mail.org", "tempmail.net", "yopmail.com", "trashmail.com", "getnada.com",
+        "dispostable.com", "maildrop.cc", "throwawaymail.com", "fakeinbox.com", "mailnesia.com",
+        "mintemail.com", "emailondeck.com", "mohmal.com", "tempr.email", "discard.email", "spamgourmet.com",
+        "mailcatch.com", "moakt.com", "burnermail.io", "inboxkitten.com", "tempinbox.com", "33mail.com"
+    ];
+    for x in disposable {
+        if d == x || d.ends_with("." + x) { return true; }
+    }
+    false
+}

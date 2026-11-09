@@ -9,6 +9,7 @@ let got = switch item.func {
   "format_number" => format_number(item.input, item.arg, item.arg2),
   "percent_change" => percent_change(item.input, item.arg),
   "safe_divide" => safe_divide(item.input, item.arg, item.arg2),
+  "parse_duration" => parse_duration(item.input, item.arg),
   _ => "unknown function"
 };
 #{ func: item.func, input: item.input, expected: item.expected, got: got, pass: got == item.expected }

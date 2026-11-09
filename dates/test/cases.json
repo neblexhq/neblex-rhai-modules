@@ -453,6 +453,146 @@
    "func": "unix_to_iso",
    "input": null,
    "expected": ""
+  },
+  {
+   "func": "quarter",
+   "input": "2026-11-09",
+   "expected": 4
+  },
+  {
+   "func": "quarter",
+   "input": "2026-01-01",
+   "expected": 1
+  },
+  {
+   "func": "quarter",
+   "input": "2026-06-30",
+   "expected": 2
+  },
+  {
+   "func": "quarter",
+   "input": "bad",
+   "expected": null
+  },
+  {
+   "func": "fiscal_year",
+   "input": "2026-11-09",
+   "arg": 10,
+   "expected": 2027
+  },
+  {
+   "func": "fiscal_year",
+   "input": "2026-09-30",
+   "arg": 10,
+   "expected": 2026
+  },
+  {
+   "func": "fiscal_year",
+   "input": "2026-11-09",
+   "arg": 1,
+   "expected": 2026
+  },
+  {
+   "func": "fiscal_year",
+   "input": "2026-07-01",
+   "arg": 7,
+   "expected": 2027
+  },
+  {
+   "func": "fiscal_year",
+   "input": "2026-06-30",
+   "arg": 7,
+   "expected": 2026
+  },
+  {
+   "func": "fiscal_year",
+   "input": "2026-11-09",
+   "arg": 13,
+   "expected": null
+  },
+  {
+   "func": "fiscal_year",
+   "input": "x",
+   "arg": 10,
+   "expected": null
+  },
+  {
+   "func": "fiscal_quarter",
+   "input": "2026-11-09",
+   "arg": 10,
+   "expected": 1
+  },
+  {
+   "func": "fiscal_quarter",
+   "input": "2026-09-15",
+   "arg": 10,
+   "expected": 4
+  },
+  {
+   "func": "fiscal_quarter",
+   "input": "2026-01-15",
+   "arg": 10,
+   "expected": 2
+  },
+  {
+   "func": "fiscal_quarter",
+   "input": "2026-05-01",
+   "arg": 1,
+   "expected": 2
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-06",
+   "arg": "2026-11-09",
+   "expected": 1
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-09",
+   "arg": "2026-11-16",
+   "expected": 5
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-07",
+   "arg": "2026-11-13",
+   "expected": 5
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-09",
+   "arg": "2026-11-06",
+   "expected": -1
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-11",
+   "arg": "2026-11-04",
+   "expected": -5
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-08",
+   "arg": "2026-11-06",
+   "expected": -1
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-09",
+   "arg": "2026-11-09",
+   "expected": 0
+  },
+  {
+   "func": "business_days_between",
+   "input": "2026-11-11",
+   "arg": "2026-12-02",
+   "expected": 15
+  },
+  {
+   "func": "business_days_between",
+   "input": "bad",
+   "arg": "2026-11-09",
+   "expected": null
   }
  ]
 }

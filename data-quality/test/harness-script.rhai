@@ -22,6 +22,9 @@ let got = switch item.func {
   "country_code" => country_code(item.input),
   "is_valid_url" => is_valid_url(item.input),
   "luhn_valid" => luhn_valid(item.input),
+  "ca_postal_code" => ca_postal_code(item.input),
+  "uk_postcode" => uk_postcode(item.input),
+  "is_disposable_email" => is_disposable_email(item.input),
   _ => "unknown function"
 };
 #{ func: item.func, input: item.input, expected: item.expected, got: got, pass: got == item.expected }

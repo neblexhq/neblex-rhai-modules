@@ -220,3 +220,139 @@ fn safe_divide(a, b, fallback) {
     if type_of(x) == "()" || type_of(y) == "()" || y == 0 { return fallback; }
     x.to_float() / y.to_float()
 }
+
+// A duration in whole seconds from text such as "1h 30m", "1h30m", "90 min", "2 hours", "1.5h",
+// "2d 4h", "1:30" (hours and minutes), "01:30:15" or ISO 8601 "PT1H30M" and "P1DT2H".
+// A bare number is read in `default_unit` ("s", "m", "h" or "d"). Rounds to the nearest second.
+// Returns () when the text isn't a duration.
+fn parse_duration(v, default_unit) {
+    let t = type_of(v);
+    if t == "i64" || t == "f64" {
+        let k = duration_unit_secs(default_unit);
+        if k == 0 || v < 0 { return (); }
+        return (v.to_float() * k).round().to_int();
+    }
+    if t != "string" { return (); }
+    let s = v.to_lower();
+    s.trim();
+    if s.len() == 0 { return (); }
+    // ISO 8601: P[nW][nD][T[nH][nM][nS]].
+    if s.starts_with("p") {
+        let total = 0.0;
+        let num = "";
+        let in_time = false;
+        let any = false;
+        for c in s.sub_string(1) {
+            if (c >= '0' && c <= '9') || c == '.' {
+                num += c;
+            } else if c == 't' {
+                in_time = true;
+            } else {
+                if num == "" || num == "." { return (); }
+                let k = switch c {
+                    'w' => if in_time { 0 } else { 604800 },
+                    'd' => if in_time { 0 } else { 86400 },
+                    'h' => if in_time { 3600 } else { 0 },
+                    'm' => if in_time { 60 } else { 0 },
+                    's' => if in_time { 1 } else { 0 },
+                    _ => 0
+                };
+                if k == 0 { return (); }
+                if !is_plain_number(num) { return (); }
+                total += parse_float(num) * k;
+                num = "";
+                any = true;
+            }
+        }
+        if !any || num != "" { return (); }
+        return total.round().to_int();
+    }
+    // Clock style: h:mm or h:mm:ss.
+    if s.contains(':') {
+        let parts = s.split(":");
+        if parts.len() < 2 || parts.len() > 3 { return (); }
+        let total = 0;
+        let k = 3600;
+        for p in parts {
+            p.trim();
+            if p.len() == 0 { return (); }
+            for c in p {
+                if c < '0' || c > '9' { return (); }
+            }
+            total += parse_int(p) * k;
+            k /= 60;
+        }
+        return total;
+    }
+    // Number and unit pairs: "1h 30m", "90 min", "1.5 hours".
+    let total = 0.0;
+    let num = "";
+    let word = "";
+    let pairs = 0;
+    for c in s + " " {
+        let digit = (c >= '0' && c <= '9') || c == '.';
+        let letter = c >= 'a' && c <= 'z';
+        if digit {
+            if word != "" {
+                if num == "" { return (); }
+                let k = duration_unit_secs(word);
+                if k == 0 { return (); }
+                if !is_plain_number(num) { return (); }
+                total += parse_float(num) * k;
+                pairs += 1;
+                num = "";
+                word = "";
+            }
+            num += c;
+        } else if letter {
+            word += c;
+        } else if c == ' ' || c == ',' {
+            if word != "" && word != "and" {
+                if num == "" { return (); }
+                let k = duration_unit_secs(word);
+                if k == 0 { return (); }
+                if !is_plain_number(num) { return (); }
+                total += parse_float(num) * k;
+                pairs += 1;
+                num = "";
+                word = "";
+            } else if word == "and" {
+                word = "";
+            }
+        } else {
+            return ();
+        }
+    }
+    if num != "" {
+        // A bare number, or a number left over after the pairs.
+        if pairs > 0 || num == "." { return (); }
+        let k = duration_unit_secs(default_unit);
+        if k == 0 { return (); }
+        if !is_plain_number(num) { return (); }
+        total += parse_float(num) * k;
+    }
+    if pairs == 0 && num == "" { return (); }
+    total.round().to_int()
+}
+
+// Seconds in one duration unit ("s", "min", "hours", "d", "weeks" and so on), 0 if unknown.
+fn duration_unit_secs(u) {
+    switch u {
+        "s" | "sec" | "secs" | "second" | "seconds" => 1,
+        "m" | "min" | "mins" | "minute" | "minutes" => 60,
+        "h" | "hr" | "hrs" | "hour" | "hours" => 3600,
+        "d" | "day" | "days" => 86400,
+        "w" | "wk" | "wks" | "week" | "weeks" => 604800,
+        _ => 0
+    }
+}
+
+// True for digits with at most one decimal point and at least one digit ("12", "1.5", ".5").
+fn is_plain_number(s) {
+    let dots = 0;
+    let digits = 0;
+    for c in s {
+        if c == '.' { dots += 1; } else if c >= '0' && c <= '9' { digits += 1; } else { return false; }
+    }
+    dots <= 1 && digits > 0
+}

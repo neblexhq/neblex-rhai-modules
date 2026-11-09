@@ -229,6 +229,89 @@
    "func": "strip_html",
    "input": "Bad &#xyz; and &#; entities",
    "expected": "Bad &#xyz; and &#; entities"
+  },
+  {
+   "func": "title_case",
+   "input": "customer_first_name",
+   "expected": "Customer First Name"
+  },
+  {
+   "func": "title_case",
+   "input": "orderID",
+   "expected": "Order Id"
+  },
+  {
+   "func": "title_case",
+   "input": "HTTPServer2 status",
+   "expected": "Http Server2 Status"
+  },
+  {
+   "func": "title_case",
+   "input": "  hello   WORLD ",
+   "expected": "Hello World"
+  },
+  {
+   "func": "title_case",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "snake_case",
+   "input": "Customer First Name",
+   "expected": "customer_first_name"
+  },
+  {
+   "func": "snake_case",
+   "input": "orderID",
+   "expected": "order_id"
+  },
+  {
+   "func": "snake_case",
+   "input": "already_snake",
+   "expected": "already_snake"
+  },
+  {
+   "func": "snake_case",
+   "input": "Total Amount (USD)",
+   "expected": "total_amount_usd"
+  },
+  {
+   "func": "snake_case",
+   "input": "ÉtatCivil",
+   "expected": "état_civil"
+  },
+  {
+   "func": "snake_case",
+   "input": 2026,
+   "expected": "2026"
+  },
+  {
+   "func": "camel_case",
+   "input": "customer first name",
+   "expected": "customerFirstName"
+  },
+  {
+   "func": "camel_case",
+   "input": "ORDER_ID",
+   "expected": "orderId"
+  },
+  {
+   "func": "camel_case",
+   "input": "x",
+   "expected": "x"
+  },
+  {
+   "func": "camel_case",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "split_words",
+   "input": "HTTPServer2",
+   "expected": [
+    "http",
+    "server2"
+   ]
   }
  ]
 }

@@ -6,12 +6,12 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 
 | Module | What it does |
 |---|---|
-| [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails, phone numbers, names, company names, domains, URLs, US ZIP codes and states, country codes, Luhn check digits and missing fields |
-| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week and end of month |
-| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change and safe division |
-| [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets and count words |
+| [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails (including disposable addresses), phone numbers, names, company names, domains, URLs, US ZIP codes and states, Canadian and UK postcodes, country codes, Luhn check digits and missing fields |
+| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week, end of month, quarter and fiscal year and quarter |
+| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change, safe division and durations |
+| [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets, count words, and title, snake and camel case |
 
-49 functions in all.
+61 functions in all.
 
 Each module stands alone, and a Code step can import several of them at once.
 
@@ -44,6 +44,9 @@ Use it to clean records before they reach a CRM, ERP or warehouse, and to build 
 | `country_code(v)` | the ISO 3166-1 two-letter code from a country name, common variant or code (about 60 countries) | `"U.S.A."` → `"US"`, `"Deutschland"` → `"DE"`, `"England"` → `"GB"` |
 | `is_valid_url(v)` | true for a well-formed http or https address with a real-looking host (it doesn't check the site exists) | `"https://acme.com/pricing"` → `true`, `"acme.com"` → `false` |
 | `luhn_valid(v)` | true when a number passes the Luhn check digit (cards, IMEI and many account numbers); spaces and hyphens are ignored | `"4111 1111 1111 1111"` → `true` |
+| `ca_postal_code(v)` | a Canadian postal code as `A1A 1A1`, or `""` when it can't be one | `"v6b4n8"` → `"V6B 4N8"` |
+| `uk_postcode(v)` | a UK postcode as `OUTWARD INWARD`, or `""` when the format is wrong | `"sw1a1aa"` → `"SW1A 1AA"` |
+| `is_disposable_email(v)` | true for well-known throwaway email services and their subdomains | `"x@mailinator.com"` → `true` |
 | `missing_fields(record, fields)` | the listed fields that are missing or blank | `["company", "phone"]` |
 | `completeness(record, fields)` | share of the listed fields that are filled in, 0.0 to 1.0 | `0.67` |
 
@@ -110,6 +113,10 @@ Use it when dates arrive as text in mixed formats, from spreadsheets, CSV export
 | `iso_week(date)` | the ISO 8601 week as `YYYY-Www` | `"2027-01-01"` → `"2026-W53"` |
 | `end_of_month(date)` | the last day of that month | `"2024-02-10"` → `"2024-02-29"` |
 | `unix_to_iso(v)` | a Unix timestamp in seconds or milliseconds as an ISO date and time in UTC | `1762700400` → `"2025-11-09T15:00:00Z"` |
+| `business_days_between(a, b)` | working days from `a` to `b`, counted the way `add_business_days` steps | `business_days_between("2026-11-06", "2026-11-09")` → `1` |
+| `quarter(date)` | the calendar quarter, 1 to 4 | `"2026-11-09"` → `4` |
+| `fiscal_year(date, start_month)` | the fiscal year, named by the calendar year it ends in | `fiscal_year("2026-11-09", 10)` → `2027` |
+| `fiscal_quarter(date, start_month)` | the quarter within that fiscal year | `fiscal_quarter("2026-11-09", 10)` → `1` |
 
 `to_iso_date` reads, for example, `2026-04-03`, `2026/4/3`, `20260403`, `04/03/2026`, `4/3/26`, `03.04.2026`, `3 Apr 2026`, `April 3rd, 2026`, `Fri, 3-Apr-26` and `2026-04-03T10:20:00Z`. Dates that start with a four-digit year are always read as year, month, day, and a time after the date is ignored.
 
@@ -126,6 +133,7 @@ Limits:
 - Month names are English only. Time zones are not converted; the date is taken as written.
 - `add_business_days` doesn't know public holidays, so they count as working days. A start on a weekend counts from the nearest working day in that direction.
 - `unix_to_iso` reads values of 100,000,000,000 or more as milliseconds, so second-based timestamps work until the year 5138.
+- `fiscal_year` names a fiscal year by the calendar year it ends in, the most common convention. If yours is named by the year it starts in, subtract 1 when `start_month` isn't 1.
 
 ## numbers
 
@@ -141,6 +149,7 @@ Use it when amounts arrive as text: exports with thousands separators, European 
 | `format_number(v, places, style)` | the number as display text; `style` is `"us"`, `"eu"`, `"fr"`, `"ch"` or `"plain"` | `format_number(1234.5, 2, "eu")` → `"1.234,50"` |
 | `percent_change(before, after)` | the change as a fraction, or `()` when `before` is 0 | `percent_change(80, 100)` → `0.25` |
 | `safe_divide(a, b, fallback)` | `a / b`, or `fallback` when `b` is 0 or a value can't be read | `safe_divide(10, 0, 0)` → `0` |
+| `parse_duration(v, default_unit)` | a duration in whole seconds from `"1h 30m"`, `"90 min"`, `"1:30"` or ISO 8601 `"PT1H30M"`; a bare number is read in `default_unit` (`"s"`, `"m"`, `"h"` or `"d"`) | `parse_duration("1h 30m", "s")` → `5400`, `parse_duration("45", "m")` → `2700` |
 
 ```rhai
 item.currency = currency_code(item.amount_text, "USD");
@@ -170,12 +179,17 @@ Use it for everyday text clean-up before values reach another system: URL slugs 
 | `pad_left(v, width, pad)` | the value padded on the left to `width` characters | `pad_left(42, 6, "0")` → `"000042"` |
 | `strip_html(v)` | plain text from an HTML snippet, common entities decoded | `"<p>Fish &amp; Chips</p>"` → `"Fish & Chips"` |
 | `word_count(v)` | the number of words | `"The quick brown fox"` → `4` |
+| `title_case(v)` | each word capitalized, separated by spaces | `"customer_first_name"` → `"Customer First Name"` |
+| `snake_case(v)` | lowercase words joined by underscores | `"Total Amount (USD)"` → `"total_amount_usd"` |
+| `camel_case(v)` | words joined, each after the first capitalized | `"ORDER_ID"` → `"orderId"` |
+| `split_words(v)` | the lowercase words of a label, split at spaces, punctuation and case changes | `"HTTPServer2"` → `["http", "server2"]` |
 
 ```rhai
 item.slug = slugify(item.product_name);
 item.summary = truncate_words(strip_html(item.description), 160);
 item.card_masked = mask_middle(item.card_number, 0, 4);
 item.sku = pad_left(item.sku, 8, "0");
+item.column = snake_case(item.label);
 ```
 
 Limits:
@@ -190,12 +204,12 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 
 | Module | Test cases | Result in our test |
 |---|---|---|
-| data-quality | [119](data-quality/test/cases.json) | all passed |
-| dates | [82](dates/test/cases.json) | all passed |
-| numbers | [64](numbers/test/cases.json) | all passed |
-| text | [41](text/test/cases.json) | all passed |
+| data-quality | [143](data-quality/test/cases.json) | all passed |
+| dates | [106](dates/test/cases.json) | all passed |
+| numbers | [89](numbers/test/cases.json) | all passed |
+| text | [57](text/test/cases.json) | all passed |
 
-All 306 cases ran in one Code step with the four modules imported together.
+All 395 cases pass in a Code step with the four modules imported together.
 
 The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all four loaded together. To run them yourself from the repository root, with Rust installed:
 

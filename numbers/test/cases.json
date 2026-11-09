@@ -396,6 +396,156 @@
    "arg": 2,
    "arg2": "us",
    "expected": "1,234,567,891.00"
+  },
+  {
+   "func": "parse_duration",
+   "input": "1h 30m",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "1h30m",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "90 min",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "2 hours",
+   "arg": "s",
+   "expected": 7200
+  },
+  {
+   "func": "parse_duration",
+   "input": "1.5h",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "2d 4h",
+   "arg": "s",
+   "expected": 187200
+  },
+  {
+   "func": "parse_duration",
+   "input": "1:30",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "01:30:15",
+   "arg": "s",
+   "expected": 5415
+  },
+  {
+   "func": "parse_duration",
+   "input": "PT1H30M",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "P1DT2H",
+   "arg": "s",
+   "expected": 93600
+  },
+  {
+   "func": "parse_duration",
+   "input": "P2W",
+   "arg": "s",
+   "expected": 1209600
+  },
+  {
+   "func": "parse_duration",
+   "input": "PT1.5H",
+   "arg": "s",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "45",
+   "arg": "m",
+   "expected": 2700
+  },
+  {
+   "func": "parse_duration",
+   "input": 45,
+   "arg": "m",
+   "expected": 2700
+  },
+  {
+   "func": "parse_duration",
+   "input": 1.5,
+   "arg": "h",
+   "expected": 5400
+  },
+  {
+   "func": "parse_duration",
+   "input": "1 hour and 15 minutes",
+   "arg": "s",
+   "expected": 4500
+  },
+  {
+   "func": "parse_duration",
+   "input": "abc",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "10 parsecs",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "PT",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "1:3x",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "45",
+   "arg": "",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "1h 30",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "P1M",
+   "arg": "s",
+   "expected": null
+  },
+  {
+   "func": "parse_duration",
+   "input": "1..5h",
+   "arg": "s",
+   "expected": null
   }
  ]
 }
