@@ -10,6 +10,8 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 
 Each module stands alone, and a Code step can import several of them at once.
 
+For jobs that are awkward in a script, such as parsing emails, XML, PDFs or fixed-width files, use a compiled module from [neblex-wasm-modules](https://github.com/neblexhq/neblex-wasm-modules) instead.
+
 ## data-quality
 
 Use it to clean records before they reach a CRM, ERP or warehouse, and to build match keys for finding duplicates.
@@ -149,6 +151,7 @@ The dates and numbers tests ran in one Code step with all three modules imported
 
 - [Scripting with Rhai in Neblex](https://www.neblex.com/integration-fabric/docs/guide/rhai)
 - [Neblex Integration Fabric](https://www.neblex.com/integration-fabric)
+- [WebAssembly modules for Neblex](https://github.com/neblexhq/neblex-wasm-modules)
 - [Neblex MCP server](https://github.com/neblexhq/neblex-mcp)
 
 ## License
