@@ -8,10 +8,10 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 |---|---|
 | [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails (including disposable addresses), phone numbers, names, company names, domains, URLs, US ZIP codes and states, Canadian and UK postcodes, country codes, Luhn check digits, match keys for people and websites, and missing fields |
 | [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week, end of month, quarter, fiscal year and quarter, months and ages |
-| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change, safe division and durations |
+| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change, safe division, durations, currency rounding, amounts in words and clamping |
 | [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets, count words, and title, snake and camel case |
 
-68 functions in all.
+71 functions in all.
 
 Each module stands alone, and a Code step can import several of them at once.
 
@@ -158,6 +158,9 @@ Use it when amounts arrive as text: exports with thousands separators, European 
 | `format_number(v, places, style)` | the number as display text; `style` is `"us"`, `"eu"`, `"fr"`, `"ch"` or `"plain"` | `format_number(1234.5, 2, "eu")` → `"1.234,50"` |
 | `percent_change(before, after)` | the change as a fraction, or `()` when `before` is 0 | `percent_change(80, 100)` → `0.25` |
 | `safe_divide(a, b, fallback)` | `a / b`, or `fallback` when `b` is 0 or a value can't be read | `safe_divide(10, 0, 0)` → `0` |
+| `currency_round(v, currency)` | rounded to the decimals the currency uses (0 for JPY, 3 for KWD, 2 for most) | `currency_round(2.675, "USD")` → `2.68`, `currency_round(1234.5, "JPY")` → `1235.0` |
+| `amount_in_words(v)` | the amount written out as on a check | `1250` → `"One thousand two hundred fifty and 00/100"` |
+| `clamp(v, low, high)` | the value limited to a range | `clamp(150, 0, 100)` → `100` |
 | `parse_duration(v, default_unit)` | a duration in whole seconds from `"1h 30m"`, `"90 min"`, `"1:30"` or ISO 8601 `"PT1H30M"`; a bare number is read in `default_unit` (`"s"`, `"m"`, `"h"` or `"d"`) | `parse_duration("1h 30m", "s")` → `5400`, `parse_duration("45", "m")` → `2700` |
 
 ```rhai
@@ -215,10 +218,10 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 |---|---|---|
 | data-quality | [164](data-quality/test/cases.json) | all passed |
 | dates | [132](dates/test/cases.json) | all passed |
-| numbers | [89](numbers/test/cases.json) | all passed |
+| numbers | [110](numbers/test/cases.json) | all passed |
 | text | [57](text/test/cases.json) | all passed |
 
-All 442 cases pass in a Code step with the four modules imported together.
+All 463 cases pass in a Code step with the four modules imported together.
 
 The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all four loaded together. To run them yourself from the repository root, with Rust installed:
 

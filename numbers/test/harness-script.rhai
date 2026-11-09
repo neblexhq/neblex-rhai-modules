@@ -10,6 +10,9 @@ let got = switch item.func {
   "percent_change" => percent_change(item.input, item.arg),
   "safe_divide" => safe_divide(item.input, item.arg, item.arg2),
   "parse_duration" => parse_duration(item.input, item.arg),
+  "currency_round" => currency_round(item.input, item.arg),
+  "amount_in_words" => amount_in_words(item.input),
+  "clamp" => clamp(item.input, item.arg, item.arg2),
   _ => "unknown function"
 };
 #{ func: item.func, input: item.input, expected: item.expected, got: got, pass: got == item.expected }

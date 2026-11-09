@@ -546,6 +546,130 @@
    "input": "1..5h",
    "arg": "s",
    "expected": null
+  },
+  {
+   "func": "currency_round",
+   "input": 2.675,
+   "arg": "USD",
+   "expected": 2.68
+  },
+  {
+   "func": "currency_round",
+   "input": 1234.5,
+   "arg": "JPY",
+   "expected": 1235.0
+  },
+  {
+   "func": "currency_round",
+   "input": 1.23456,
+   "arg": "KWD",
+   "expected": 1.235
+  },
+  {
+   "func": "currency_round",
+   "input": -1.005,
+   "arg": "eur",
+   "expected": -1.01
+  },
+  {
+   "func": "currency_round",
+   "input": 10,
+   "arg": "GBP",
+   "expected": 10.0
+  },
+  {
+   "func": "currency_round",
+   "input": 1.5,
+   "arg": "US",
+   "expected": null
+  },
+  {
+   "func": "currency_round",
+   "input": "abc",
+   "arg": "USD",
+   "expected": null
+  },
+  {
+   "func": "amount_in_words",
+   "input": 1250,
+   "expected": "One thousand two hundred fifty and 00/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": "1,234,567.89",
+   "expected": "One million two hundred thirty-four thousand five hundred sixty-seven and 89/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": 0.5,
+   "expected": "Zero and 50/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": -42.07,
+   "expected": "Minus forty-two and 07/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": 100000,
+   "expected": "One hundred thousand and 00/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": 19.999,
+   "expected": "Twenty and 00/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": 2000000000015,
+   "expected": "Two trillion fifteen and 00/100"
+  },
+  {
+   "func": "amount_in_words",
+   "input": "n/a",
+   "expected": ""
+  },
+  {
+   "func": "clamp",
+   "input": 150,
+   "arg": 0,
+   "arg2": 100,
+   "expected": 100
+  },
+  {
+   "func": "clamp",
+   "input": -5,
+   "arg": 0,
+   "arg2": 100,
+   "expected": 0
+  },
+  {
+   "func": "clamp",
+   "input": 42.5,
+   "arg": 0,
+   "arg2": 100,
+   "expected": 42.5
+  },
+  {
+   "func": "clamp",
+   "input": "75%",
+   "arg": 0,
+   "arg2": 100,
+   "expected": 75
+  },
+  {
+   "func": "clamp",
+   "input": 5,
+   "arg": 10,
+   "arg2": 0,
+   "expected": null
+  },
+  {
+   "func": "clamp",
+   "input": "x",
+   "arg": 0,
+   "arg2": 1,
+   "expected": null
   }
  ]
 }

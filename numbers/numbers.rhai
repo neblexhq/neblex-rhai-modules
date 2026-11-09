@@ -356,3 +356,88 @@ fn is_plain_number(s) {
     }
     dots <= 1 && digits > 0
 }
+
+// Rounds an amount to the decimal places its currency uses (ISO 4217): 0 for JPY, KRW and others
+// without minor units, 3 for BHD, KWD, OMR, JOD, TND, IQD and LYD, 2 for the rest. Halves round
+// away from zero. Reads text the way parse_number does with "auto". Returns () when the amount
+// can't be read or the currency isn't a three-letter code.
+fn currency_round(v, currency) {
+    let x = parse_number(v, "auto");
+    if type_of(x) == "()" || type_of(currency) != "string" || currency.len() != 3 { return (); }
+    let c = currency.to_upper();
+    let places = if ["JPY", "KRW", "VND", "CLP", "ISK", "UGX", "XOF", "XAF", "PYG", "KMF", "RWF"].contains(c) {
+        0
+    } else if ["BHD", "KWD", "OMR", "JOD", "TND", "IQD", "LYD"].contains(c) {
+        3
+    } else {
+        2
+    };
+    let f = 1.0;
+    for i in 0..places { f *= 10.0; }
+    // A tiny nudge so 2.675 (stored as 2.67499999...) still rounds up.
+    let y = x.to_float() * f;
+    y = if y >= 0.0 { y + 0.000000001 } else { y - 0.000000001 };
+    y.round() / f
+}
+
+// An amount written out the way checks show it: 1250 -> "One thousand two hundred fifty and 00/100".
+// Cents are rounded; negative amounts start with "Minus". Amounts up to 999 trillion.
+// Reads text the way parse_number does with "auto". Returns "" when the amount can't be read.
+fn amount_in_words(v) {
+    let x = parse_number(v, "auto");
+    if type_of(x) == "()" { return ""; }
+    let neg = x < 0;
+    let units = ((if neg { -x.to_float() } else { x.to_float() }) * 100.0 + 0.000001).round().to_int();
+    let whole = units / 100;
+    let cents = units % 100;
+    if whole >= 1000000000000000 { return ""; }
+    let words = if whole == 0 { "zero" } else { "" };
+    let scales = ["", " thousand", " million", " billion", " trillion"];
+    let groups = [];
+    let n = whole;
+    while n > 0 {
+        groups.push(n % 1000);
+        n /= 1000;
+    }
+    let i = groups.len() - 1;
+    while i >= 0 {
+        let g = groups[i];
+        if g > 0 {
+            if words.len() > 0 { words += " "; }
+            words += words_under_1000(g) + scales[i];
+        }
+        i -= 1;
+    }
+    let out = words.sub_string(0, 1).to_upper() + words.sub_string(1) + " and " + (if cents < 10 { "0" + cents } else { cents.to_string() }) + "/100";
+    if neg { "Minus " + out.sub_string(0, 1).to_lower() + out.sub_string(1) } else { out }
+}
+
+// 1-999 in words: 342 -> "three hundred forty-two". Used by amount_in_words.
+fn words_under_1000(n) {
+    let ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven",
+                "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+    let tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+    let out = "";
+    if n >= 100 {
+        out = ones[n / 100] + " hundred";
+        n = n % 100;
+        if n > 0 { out += " "; }
+    }
+    if n >= 20 {
+        out += tens[n / 10];
+        if n % 10 > 0 { out += "-" + ones[n % 10]; }
+    } else if n > 0 {
+        out += ones[n];
+    }
+    out
+}
+
+// The value limited to the range from `low` to `high`: clamp(150, 0, 100) -> 100, clamp(-5, 0, 100) -> 0.
+// Reads text the way parse_number does with "auto". Returns () when a value can't be read or low > high.
+fn clamp(v, low, high) {
+    let x = parse_number(v, "auto");
+    let lo = parse_number(low, "auto");
+    let hi = parse_number(high, "auto");
+    if type_of(x) == "()" || type_of(lo) == "()" || type_of(hi) == "()" || lo > hi { return (); }
+    if x < lo { lo } else if x > hi { hi } else { x }
+}
