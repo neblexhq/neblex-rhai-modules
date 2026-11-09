@@ -7,6 +7,12 @@ let got = switch item.func {
   "days_between" => days_between(item.input, item.arg),
   "is_leap_year" => is_leap_year(item.input),
   "days_in_month" => days_in_month(item.input, item.arg),
+  "add_days_iso" => add_days_iso(item.input, item.arg),
+  "day_of_week" => day_of_week(item.input),
+  "add_business_days" => add_business_days(item.input, item.arg),
+  "iso_week" => iso_week(item.input),
+  "end_of_month" => end_of_month(item.input),
+  "unix_to_iso" => unix_to_iso(item.input),
   _ => "unknown function"
 };
 #{ func: item.func, input: item.input, expected: item.expected, got: got, pass: got == item.expected }

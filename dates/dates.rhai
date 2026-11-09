@@ -198,3 +198,113 @@ fn days_between(a, b) {
     let db = days_from_civil(parse_int(b.sub_string(0, 4)), parse_int(b.sub_string(5, 2)), parse_int(b.sub_string(8, 2)));
     db - da
 }
+
+// Days since 1970-01-01 for a YYYY-MM-DD date the caller has already validated.
+fn iso_to_days(s) {
+    days_from_civil(parse_int(s.sub_string(0, 4)), parse_int(s.sub_string(5, 2)), parse_int(s.sub_string(8, 2)))
+}
+
+// The date `n` days after a YYYY-MM-DD date (before it when `n` is negative):
+// add_days_iso("2026-01-30", 3) -> "2026-02-02". Returns "" when the date isn't valid or `n`
+// isn't a whole number. (Named add_days_iso because Neblex already has add_days for date values.)
+fn add_days_iso(date, n) {
+    if !is_valid_iso_date(date) || type_of(n) != "i64" { return ""; }
+    date_from_days(iso_to_days(date) + n)
+}
+
+// ISO day of the week for a YYYY-MM-DD date: 1 = Monday ... 7 = Sunday. Returns () when the
+// date isn't valid.
+fn day_of_week(date) {
+    if !is_valid_iso_date(date) { return (); }
+    // 1970-01-01 was a Thursday.
+    ((iso_to_days(date) + 3) % 7 + 7) % 7 + 1
+}
+
+// The date `n` working days (Monday to Friday) after a YYYY-MM-DD date, or before it when `n` is
+// negative. A start on a weekend counts from the nearest working day in that direction, so 5
+// working days after a Saturday is the next Friday. Public holidays aren't known, so they count
+// as working days. Returns "" when the date isn't valid or `n` isn't a whole number.
+fn add_business_days(date, n) {
+    if !is_valid_iso_date(date) || type_of(n) != "i64" { return ""; }
+    let d = iso_to_days(date);
+    if n == 0 { return date; }
+    let wd = day_of_week(date);
+    // Move a weekend start to Friday (counting forward) or Monday (counting back).
+    if wd > 5 {
+        d += if n > 0 { 5 - wd } else { 8 - wd };
+    }
+    let step = if n < 0 { -1 } else { 1 };
+    let left = if n < 0 { -n } else { n };
+    d += (left / 5) * 7 * step;
+    left = left % 5;
+    while left > 0 {
+        d += step;
+        let w = ((d + 3) % 7 + 7) % 7;
+        if w < 5 { left -= 1; }
+    }
+    date_from_days(d)
+}
+
+// The ISO 8601 week of a YYYY-MM-DD date as "YYYY-Www", for example "2026-W45". Weeks start on
+// Monday and week 1 holds the year's first Thursday, so early January can belong to the previous
+// year's last week. Returns "" when the date isn't valid.
+fn iso_week(date) {
+    if !is_valid_iso_date(date) { return ""; }
+    let d = iso_to_days(date);
+    let thursday = d + 4 - day_of_week(date);
+    let y = parse_int(date_from_days(thursday).sub_string(0, 4));
+    let week = (thursday - days_from_civil(y, 1, 1)) / 7 + 1;
+    y.to_string() + "-W" + (if week < 10 { "0" + week } else { week.to_string() })
+}
+
+// The last day of the month of a YYYY-MM-DD date: "2024-02-10" -> "2024-02-29".
+// Returns "" when the date isn't valid.
+fn end_of_month(date) {
+    if !is_valid_iso_date(date) { return ""; }
+    let y = parse_int(date.sub_string(0, 4));
+    let m = parse_int(date.sub_string(5, 2));
+    iso_from_parts(y, m, days_in_month(y, m))
+}
+
+// A Unix timestamp as an ISO date and time in UTC, "YYYY-MM-DDTHH:MM:SSZ". Accepts seconds or
+// milliseconds (values of 100,000,000,000 or more are read as milliseconds), as a number or as
+// digits in text. Fractions of a second are dropped. Returns "" when the value isn't a timestamp.
+fn unix_to_iso(v) {
+    let t = type_of(v);
+    let n = 0;
+    if t == "i64" {
+        n = v;
+    } else if t == "f64" {
+        n = v.floor().to_int();
+    } else if t == "string" {
+        let s = v;
+        s.trim();
+        let neg = s.starts_with("-");
+        if neg { s = s.sub_string(1); }
+        let dot = s.index_of('.');
+        if dot >= 0 { s = s.sub_string(0, dot); }
+        if s.len() == 0 { return ""; }
+        for c in s {
+            if c < '0' || c > '9' { return ""; }
+        }
+        n = parse_int(s);
+        if neg { n = -n; }
+    } else {
+        return "";
+    }
+    let secs = n;
+    let abs = if n < 0 { -n } else { n };
+    if abs >= 100000000000 {
+        secs = if n >= 0 { n / 1000 } else { -((-n + 999) / 1000) };
+    }
+    let days = if secs >= 0 { secs / 86400 } else { -((-secs + 86399) / 86400) };
+    let rest = secs - days * 86400;
+    let date = date_from_days(days);
+    if date == "" { return ""; }
+    date + "T" + pad2(rest / 3600) + ":" + pad2((rest / 60) % 60) + ":" + pad2(rest % 60) + "Z"
+}
+
+// A whole number from 0 to 99 as two digits.
+fn pad2(x) {
+    if x < 10 { "0" + x } else { x.to_string() }
+}

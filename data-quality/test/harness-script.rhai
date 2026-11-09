@@ -19,6 +19,9 @@ let got = switch item.func {
   "us_state_code" => us_state_code(item.input),
   "missing_fields" => missing_fields(item.input, item.arg),
   "completeness" => completeness(item.input, item.arg),
+  "country_code" => country_code(item.input),
+  "is_valid_url" => is_valid_url(item.input),
+  "luhn_valid" => luhn_valid(item.input),
   _ => "unknown function"
 };
 #{ func: item.func, input: item.input, expected: item.expected, got: got, pass: got == item.expected }

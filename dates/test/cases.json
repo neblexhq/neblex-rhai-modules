@@ -1,45 +1,458 @@
-{"cases": [
- {"func": "to_iso_date", "input": "2026-04-03", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "2026/4/3", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": 20260403, "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "20260403", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "04/03/2026", "arg": "mdy", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "04/03/2026", "arg": "dmy", "expected": "2026-03-04"},
- {"func": "to_iso_date", "input": "4/3/26", "arg": "mdy", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "03.04.2026", "arg": "dmy", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "3 Apr 2026", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "April 3rd, 2026", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "Fri, 3-Apr-26", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "Apr 3, 99", "arg": "", "expected": "1999-04-03"},
- {"func": "to_iso_date", "input": "2026-04-03T10:20:00Z", "arg": "", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "04/03/2026 14:30", "arg": "mdy", "expected": "2026-04-03"},
- {"func": "to_iso_date", "input": "3 Oct 2026 10:20", "arg": "", "expected": "2026-10-03"},
- {"func": "to_iso_date", "input": "Sept 9 2026", "arg": "", "expected": "2026-09-09"},
- {"func": "to_iso_date", "input": "2024-02-29", "arg": "", "expected": "2024-02-29"},
- {"func": "to_iso_date", "input": "2026-02-29", "arg": "", "expected": ""},
- {"func": "to_iso_date", "input": "13/25/2026", "arg": "mdy", "expected": ""},
- {"func": "to_iso_date", "input": "04/03/2026", "arg": "", "expected": ""},
- {"func": "to_iso_date", "input": "next tuesday", "arg": "", "expected": ""},
- {"func": "to_iso_date", "input": null, "arg": "", "expected": ""},
- {"func": "is_valid_iso_date", "input": "2024-02-29", "expected": true},
- {"func": "is_valid_iso_date", "input": "2026-02-30", "expected": false},
- {"func": "is_valid_iso_date", "input": "2026-4-3", "expected": false},
- {"func": "excel_serial_to_iso", "input": 45750, "expected": "2025-04-03"},
- {"func": "excel_serial_to_iso", "input": 45750.75, "expected": "2025-04-03"},
- {"func": "excel_serial_to_iso", "input": "45750.5", "expected": "2025-04-03"},
- {"func": "excel_serial_to_iso", "input": 1, "expected": "1900-01-01"},
- {"func": "excel_serial_to_iso", "input": 59, "expected": "1900-02-28"},
- {"func": "excel_serial_to_iso", "input": 60, "expected": ""},
- {"func": "excel_serial_to_iso", "input": 61, "expected": "1900-03-01"},
- {"func": "excel_serial_to_iso", "input": 0, "expected": ""},
- {"func": "excel_serial_to_iso", "input": "abc", "expected": ""},
- {"func": "days_between", "input": "2024-02-28", "arg": "2026-03-01", "expected": 732},
- {"func": "days_between", "input": "2026-04-03", "arg": "2026-04-01", "expected": -2},
- {"func": "days_between", "input": "2026-02-30", "arg": "2026-03-01", "expected": null},
- {"func": "is_leap_year", "input": 2024, "expected": true},
- {"func": "is_leap_year", "input": 1900, "expected": false},
- {"func": "is_leap_year", "input": 2000, "expected": true},
- {"func": "days_in_month", "input": 2024, "arg": 2, "expected": 29},
- {"func": "days_in_month", "input": 2026, "arg": 2, "expected": 28},
- {"func": "days_in_month", "input": 2026, "arg": 13, "expected": 0}
-]}
+{
+ "cases": [
+  {
+   "func": "to_iso_date",
+   "input": "2026-04-03",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "2026/4/3",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": 20260403,
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "20260403",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "04/03/2026",
+   "arg": "mdy",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "04/03/2026",
+   "arg": "dmy",
+   "expected": "2026-03-04"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "4/3/26",
+   "arg": "mdy",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "03.04.2026",
+   "arg": "dmy",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "3 Apr 2026",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "April 3rd, 2026",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "Fri, 3-Apr-26",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "Apr 3, 99",
+   "arg": "",
+   "expected": "1999-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "2026-04-03T10:20:00Z",
+   "arg": "",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "04/03/2026 14:30",
+   "arg": "mdy",
+   "expected": "2026-04-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "3 Oct 2026 10:20",
+   "arg": "",
+   "expected": "2026-10-03"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "Sept 9 2026",
+   "arg": "",
+   "expected": "2026-09-09"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "2024-02-29",
+   "arg": "",
+   "expected": "2024-02-29"
+  },
+  {
+   "func": "to_iso_date",
+   "input": "2026-02-29",
+   "arg": "",
+   "expected": ""
+  },
+  {
+   "func": "to_iso_date",
+   "input": "13/25/2026",
+   "arg": "mdy",
+   "expected": ""
+  },
+  {
+   "func": "to_iso_date",
+   "input": "04/03/2026",
+   "arg": "",
+   "expected": ""
+  },
+  {
+   "func": "to_iso_date",
+   "input": "next tuesday",
+   "arg": "",
+   "expected": ""
+  },
+  {
+   "func": "to_iso_date",
+   "input": null,
+   "arg": "",
+   "expected": ""
+  },
+  {
+   "func": "is_valid_iso_date",
+   "input": "2024-02-29",
+   "expected": true
+  },
+  {
+   "func": "is_valid_iso_date",
+   "input": "2026-02-30",
+   "expected": false
+  },
+  {
+   "func": "is_valid_iso_date",
+   "input": "2026-4-3",
+   "expected": false
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 45750,
+   "expected": "2025-04-03"
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 45750.75,
+   "expected": "2025-04-03"
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": "45750.5",
+   "expected": "2025-04-03"
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 1,
+   "expected": "1900-01-01"
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 59,
+   "expected": "1900-02-28"
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 60,
+   "expected": ""
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 61,
+   "expected": "1900-03-01"
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": 0,
+   "expected": ""
+  },
+  {
+   "func": "excel_serial_to_iso",
+   "input": "abc",
+   "expected": ""
+  },
+  {
+   "func": "days_between",
+   "input": "2024-02-28",
+   "arg": "2026-03-01",
+   "expected": 732
+  },
+  {
+   "func": "days_between",
+   "input": "2026-04-03",
+   "arg": "2026-04-01",
+   "expected": -2
+  },
+  {
+   "func": "days_between",
+   "input": "2026-02-30",
+   "arg": "2026-03-01",
+   "expected": null
+  },
+  {
+   "func": "is_leap_year",
+   "input": 2024,
+   "expected": true
+  },
+  {
+   "func": "is_leap_year",
+   "input": 1900,
+   "expected": false
+  },
+  {
+   "func": "is_leap_year",
+   "input": 2000,
+   "expected": true
+  },
+  {
+   "func": "days_in_month",
+   "input": 2024,
+   "arg": 2,
+   "expected": 29
+  },
+  {
+   "func": "days_in_month",
+   "input": 2026,
+   "arg": 2,
+   "expected": 28
+  },
+  {
+   "func": "days_in_month",
+   "input": 2026,
+   "arg": 13,
+   "expected": 0
+  },
+  {
+   "func": "add_days_iso",
+   "input": "2026-01-30",
+   "arg": 3,
+   "expected": "2026-02-02"
+  },
+  {
+   "func": "add_days_iso",
+   "input": "2024-02-28",
+   "arg": 1,
+   "expected": "2024-02-29"
+  },
+  {
+   "func": "add_days_iso",
+   "input": "2026-03-01",
+   "arg": -1,
+   "expected": "2026-02-28"
+  },
+  {
+   "func": "add_days_iso",
+   "input": "2026-12-31",
+   "arg": 1,
+   "expected": "2027-01-01"
+  },
+  {
+   "func": "add_days_iso",
+   "input": "2026-02-30",
+   "arg": 1,
+   "expected": ""
+  },
+  {
+   "func": "add_days_iso",
+   "input": "2026-01-01",
+   "arg": "3",
+   "expected": ""
+  },
+  {
+   "func": "day_of_week",
+   "input": "2026-11-09",
+   "expected": 1
+  },
+  {
+   "func": "day_of_week",
+   "input": "2026-11-15",
+   "expected": 7
+  },
+  {
+   "func": "day_of_week",
+   "input": "1970-01-01",
+   "expected": 4
+  },
+  {
+   "func": "day_of_week",
+   "input": "1969-12-31",
+   "expected": 3
+  },
+  {
+   "func": "day_of_week",
+   "input": "not a date",
+   "expected": null
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-06",
+   "arg": 1,
+   "expected": "2026-11-09"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-09",
+   "arg": 5,
+   "expected": "2026-11-16"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-07",
+   "arg": 5,
+   "expected": "2026-11-13"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-07",
+   "arg": 1,
+   "expected": "2026-11-09"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-09",
+   "arg": -1,
+   "expected": "2026-11-06"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-08",
+   "arg": -1,
+   "expected": "2026-11-06"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-11",
+   "arg": -5,
+   "expected": "2026-11-04"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-11",
+   "arg": 15,
+   "expected": "2026-12-02"
+  },
+  {
+   "func": "add_business_days",
+   "input": "2026-11-08",
+   "arg": 0,
+   "expected": "2026-11-08"
+  },
+  {
+   "func": "add_business_days",
+   "input": "bad",
+   "arg": 2,
+   "expected": ""
+  },
+  {
+   "func": "iso_week",
+   "input": "2026-11-09",
+   "expected": "2026-W46"
+  },
+  {
+   "func": "iso_week",
+   "input": "2026-01-01",
+   "expected": "2026-W01"
+  },
+  {
+   "func": "iso_week",
+   "input": "2027-01-01",
+   "expected": "2026-W53"
+  },
+  {
+   "func": "iso_week",
+   "input": "2024-12-30",
+   "expected": "2025-W01"
+  },
+  {
+   "func": "iso_week",
+   "input": "2021-01-03",
+   "expected": "2020-W53"
+  },
+  {
+   "func": "iso_week",
+   "input": "x",
+   "expected": ""
+  },
+  {
+   "func": "end_of_month",
+   "input": "2024-02-10",
+   "expected": "2024-02-29"
+  },
+  {
+   "func": "end_of_month",
+   "input": "2026-02-01",
+   "expected": "2026-02-28"
+  },
+  {
+   "func": "end_of_month",
+   "input": "2026-12-15",
+   "expected": "2026-12-31"
+  },
+  {
+   "func": "end_of_month",
+   "input": "2026-04-31",
+   "expected": ""
+  },
+  {
+   "func": "unix_to_iso",
+   "input": 0,
+   "expected": "1970-01-01T00:00:00Z"
+  },
+  {
+   "func": "unix_to_iso",
+   "input": 1762700400,
+   "expected": "2025-11-09T15:00:00Z"
+  },
+  {
+   "func": "unix_to_iso",
+   "input": 1762700400123,
+   "expected": "2025-11-09T15:00:00Z"
+  },
+  {
+   "func": "unix_to_iso",
+   "input": "1762700400",
+   "expected": "2025-11-09T15:00:00Z"
+  },
+  {
+   "func": "unix_to_iso",
+   "input": -1,
+   "expected": "1969-12-31T23:59:59Z"
+  },
+  {
+   "func": "unix_to_iso",
+   "input": 1762700400.9,
+   "expected": "2025-11-09T15:00:00Z"
+  },
+  {
+   "func": "unix_to_iso",
+   "input": "abc",
+   "expected": ""
+  },
+  {
+   "func": "unix_to_iso",
+   "input": null,
+   "expected": ""
+  }
+ ]
+}

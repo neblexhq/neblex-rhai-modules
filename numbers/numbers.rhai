@@ -149,3 +149,74 @@ fn currency_code(v, dollar_default) {
     if v.contains('$') { return dollar_default; }
     ""
 }
+
+// Rounds to `places` decimals with ties going to the even digit (banker's rounding), as many
+// accounting and tax rules require: 2.345 -> 2.34, 2.355 -> 2.36, 2.5 to 0 places -> 2.0.
+// Reads text the way parse_number does with "auto". Returns () when no number can be read.
+fn round_half_even(v, places) {
+    let x = parse_number(v, "auto");
+    if type_of(x) == "()" { return (); }
+    let f = 1.0;
+    for i in 0..places { f *= 10.0; }
+    let scaled = x.to_float() * f;
+    let lower = scaled.floor();
+    let diff = scaled - lower;
+    // Values within a tiny margin of .5 count as ties, so 2.345 (stored as 2.34499999...) still ties.
+    let rounded = if diff > 0.5 + 0.000000001 {
+        lower + 1.0
+    } else if diff < 0.5 - 0.000000001 {
+        lower
+    } else if lower % 2.0 == 0.0 {
+        lower
+    } else {
+        lower + 1.0
+    };
+    rounded / f
+}
+
+// Formats a number for display with `places` decimals and thousands separators, in a `style`:
+// "us" -> "1,234.50", "eu" -> "1.234,50", "fr" -> "1 234,50", "ch" -> "1'234.50", "plain" -> "1234.50".
+// Rounds halves away from zero. Reads text the way parse_number does with "auto".
+// Returns "" when no number can be read.
+fn format_number(v, places, style) {
+    let x = parse_number(v, "auto");
+    if type_of(x) == "()" { return ""; }
+    let neg = x < 0;
+    let a = if neg { -x.to_float() } else { x.to_float() };
+    let f = 1;
+    for i in 0..places { f *= 10; }
+    let units = (a * f.to_float()).round().to_int();
+    let int_part = (units / f).to_string();
+    let frac = (units % f).to_string();
+    while frac.len() < places { frac = "0" + frac; }
+    let group = switch style { "eu" => ".", "fr" => " ", "ch" => "'", "plain" => "", _ => "," };
+    let dec = switch style { "eu" => ",", "fr" => ",", _ => "." };
+    let grouped = "";
+    let n = int_part.len();
+    let i = 0;
+    for c in int_part {
+        if i > 0 && (n - i) % 3 == 0 { grouped += group; }
+        grouped += c;
+        i += 1;
+    }
+    let out = if places > 0 { grouped + dec + frac } else { grouped };
+    if neg && units > 0 { "-" + out } else { out }
+}
+
+// The change from `before` to `after` as a fraction: 80 -> 100 is 0.25 (25%), 100 -> 80 is -0.2.
+// Returns () when either value can't be read or `before` is 0.
+fn percent_change(before, after) {
+    let a = parse_number(before, "auto");
+    let b = parse_number(after, "auto");
+    if type_of(a) == "()" || type_of(b) == "()" || a == 0 { return (); }
+    (b.to_float() - a.to_float()) / a.to_float().abs()
+}
+
+// `a` divided by `b` as a decimal number, or `fallback` when `b` is 0 or either value can't be
+// read: safe_divide(10, 4, 0) -> 2.5, safe_divide(10, 0, 0) -> 0.
+fn safe_divide(a, b, fallback) {
+    let x = parse_number(a, "auto");
+    let y = parse_number(b, "auto");
+    if type_of(x) == "()" || type_of(y) == "()" || y == 0 { return fallback; }
+    x.to_float() / y.to_float()
+}

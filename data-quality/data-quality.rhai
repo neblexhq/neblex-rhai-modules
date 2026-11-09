@@ -359,3 +359,166 @@ fn completeness(record, fields) {
     let filled = fields.len() - missing_fields(record, fields).len();
     ((filled.to_float() / fields.len().to_float()) * 100.0).round() / 100.0
 }
+
+// ---------- Countries, URLs and check digits ----------
+
+// The ISO 3166-1 two-letter code for a country written as a name, a common variant or a
+// two- or three-letter code: "United States", "U.S.A." and "USA" -> "US", "Deutschland" -> "DE",
+// "UK" and "England" -> "GB". Covers about 60 countries most common in business data.
+// Returns "" when the country isn't recognized.
+fn country_code(v) {
+    if type_of(v) != "string" { return ""; }
+    // Lowercase, keep letters and spaces, collapse spaces, drop a leading "the ".
+    let k = "";
+    let space = false;
+    for c in v.to_lower() {
+        if c.to_upper() != c.to_lower() {
+            if space && k.len() > 0 { k += " "; }
+            k += c;
+            space = false;
+        } else if c == ' ' || c == '-' || c == ',' || c == '\t' {
+            space = true;
+        }
+    }
+    if k.starts_with("the ") { k = k.sub_string(4); }
+    if k.len() == 0 { return ""; }
+    let table = [
+        ["US", "usa", "united states", "united states of america", "america", "us"],
+        ["GB", "gbr", "united kingdom", "uk", "great britain", "britain", "england", "scotland", "wales", "northern ireland", "gb"],
+        ["CA", "can", "canada", "ca"],
+        ["MX", "mex", "mexico", "méxico", "mx"],
+        ["DE", "deu", "germany", "deutschland", "de"],
+        ["FR", "fra", "france", "fr"],
+        ["ES", "esp", "spain", "españa", "espana", "es"],
+        ["IT", "ita", "italy", "italia", "it"],
+        ["NL", "nld", "netherlands", "holland", "nederland", "nl"],
+        ["BE", "bel", "belgium", "belgië", "belgique", "be"],
+        ["LU", "lux", "luxembourg", "lu"],
+        ["CH", "che", "switzerland", "schweiz", "suisse", "svizzera", "ch"],
+        ["AT", "aut", "austria", "österreich", "osterreich", "at"],
+        ["IE", "irl", "ireland", "republic of ireland", "ie"],
+        ["PT", "prt", "portugal", "pt"],
+        ["SE", "swe", "sweden", "sverige", "se"],
+        ["NO", "nor", "norway", "norge", "no"],
+        ["DK", "dnk", "denmark", "danmark", "dk"],
+        ["FI", "fin", "finland", "suomi", "fi"],
+        ["IS", "isl", "iceland", "is"],
+        ["PL", "pol", "poland", "polska", "pl"],
+        ["CZ", "cze", "czech republic", "czechia", "cz"],
+        ["SK", "svk", "slovakia", "sk"],
+        ["HU", "hun", "hungary", "hu"],
+        ["RO", "rou", "romania", "ro"],
+        ["BG", "bgr", "bulgaria", "bg"],
+        ["GR", "grc", "greece", "gr"],
+        ["HR", "hrv", "croatia", "hr"],
+        ["SI", "svn", "slovenia", "si"],
+        ["EE", "est", "estonia", "ee"],
+        ["LV", "lva", "latvia", "lv"],
+        ["LT", "ltu", "lithuania", "lt"],
+        ["UA", "ukr", "ukraine", "ua"],
+        ["TR", "tur", "turkey", "türkiye", "turkiye", "tr"],
+        ["IL", "isr", "israel", "il"],
+        ["AE", "are", "united arab emirates", "uae", "ae"],
+        ["SA", "sau", "saudi arabia", "sa"],
+        ["EG", "egy", "egypt", "eg"],
+        ["ZA", "zaf", "south africa", "za"],
+        ["NG", "nga", "nigeria", "ng"],
+        ["KE", "ken", "kenya", "ke"],
+        ["MA", "mar", "morocco", "ma"],
+        ["IN", "ind", "india", "in"],
+        ["CN", "chn", "china", "peoples republic of china", "prc", "cn"],
+        ["HK", "hkg", "hong kong", "hk"],
+        ["TW", "twn", "taiwan", "tw"],
+        ["JP", "jpn", "japan", "jp"],
+        ["KR", "kor", "south korea", "korea", "republic of korea", "kr"],
+        ["SG", "sgp", "singapore", "sg"],
+        ["MY", "mys", "malaysia", "my"],
+        ["TH", "tha", "thailand", "th"],
+        ["VN", "vnm", "vietnam", "viet nam", "vn"],
+        ["PH", "phl", "philippines", "ph"],
+        ["ID", "idn", "indonesia", "id"],
+        ["AU", "aus", "australia", "au"],
+        ["NZ", "nzl", "new zealand", "nz"],
+        ["BR", "bra", "brazil", "brasil", "br"],
+        ["AR", "arg", "argentina", "ar"],
+        ["CL", "chl", "chile", "cl"],
+        ["CO", "col", "colombia", "co"],
+        ["PE", "per", "peru", "perú", "pe"],
+        ["CR", "cri", "costa rica", "cr"],
+        ["PR", "pri", "puerto rico", "pr"]
+    ];
+    // "U.S." and "U.K." arrive as single letters separated by spaces after cleanup.
+    let joined = k;
+    joined.replace(" ", "");
+    for row in table {
+        for i in 1..row.len() {
+            if row[i] == k || (joined.len() <= 3 && row[i] == joined) { return row[0]; }
+        }
+    }
+    ""
+}
+
+// True for a well-formed http or https web address with a real-looking host name:
+// "https://www.acme.com/pricing?x=1" -> true, "acme.com" -> false (no scheme),
+// "http://localhost:8080" -> false. It doesn't check that the site exists.
+fn is_valid_url(v) {
+    if type_of(v) != "string" { return false; }
+    let s = v;
+    s.trim();
+    let lower = s.to_lower();
+    let rest = if lower.starts_with("https://") { lower.sub_string(8) } else if lower.starts_with("http://") { lower.sub_string(7) } else { return false; };
+    for c in rest {
+        if c == ' ' || c == '\t' || c == '"' || c == '<' || c == '>' { return false; }
+    }
+    // The host ends at the first /, ? or #; drop a port and user info.
+    let end = rest.len();
+    let i = 0;
+    for c in rest {
+        if c == '/' || c == '?' || c == '#' { end = i; break; }
+        i += 1;
+    }
+    let host = rest.sub_string(0, end);
+    let at = host.index_of('@');
+    if at >= 0 { host = host.sub_string(at + 1); }
+    let colon = host.index_of(':');
+    if colon >= 0 {
+        let port = host.sub_string(colon + 1);
+        if port.len() == 0 || port.len() > 5 { return false; }
+        for c in port {
+            if c < '0' || c > '9' { return false; }
+        }
+        if parse_int(port) > 65535 { return false; }
+        host = host.sub_string(0, colon);
+    }
+    is_valid_domain(host)
+}
+
+// True when a number passes the Luhn check digit, used by payment cards, IMEI numbers and many
+// account numbers. Spaces and hyphens are ignored; any other non-digit makes it false, and so does
+// a number shorter than 2 digits.
+fn luhn_valid(v) {
+    if type_of(v) == "()" { return false; }
+    let digits = [];
+    for c in v.to_string() {
+        if c >= '0' && c <= '9' {
+            digits.push(c.to_int() - 48);
+        } else if c != ' ' && c != '-' {
+            return false;
+        }
+    }
+    if digits.len() < 2 { return false; }
+    let sum = 0;
+    let double = false;
+    let i = digits.len() - 1;
+    while i >= 0 {
+        let d = digits[i];
+        if double {
+            d *= 2;
+            if d > 9 { d -= 9; }
+        }
+        sum += d;
+        double = !double;
+        i -= 1;
+    }
+    sum % 10 == 0
+}

@@ -6,9 +6,12 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 
 | Module | What it does |
 |---|---|
-| [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails, phone numbers, names, company names, domains, US ZIP codes and states, and missing fields |
-| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and counts days between dates |
-| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes |
+| [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails, phone numbers, names, company names, domains, URLs, US ZIP codes and states, country codes, Luhn check digits and missing fields |
+| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week and end of month |
+| [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change and safe division |
+| [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets and count words |
+
+49 functions in all.
 
 Each module stands alone, and a Code step can import several of them at once.
 
@@ -38,6 +41,9 @@ Use it to clean records before they reach a CRM, ERP or warehouse, and to build 
 | `domain_from_url(v)` | the host from a website or email address | `"https://www.Acme.com/about"` → `"acme.com"` |
 | `us_zip(v)` | `12345` or `12345-6789`, restoring a leading zero a spreadsheet dropped | `"2134"` → `"02134"` |
 | `us_state_code(v)` | the two-letter code for a US state, DC or Puerto Rico | `"N.Y."` → `"NY"` |
+| `country_code(v)` | the ISO 3166-1 two-letter code from a country name, common variant or code (about 60 countries) | `"U.S.A."` → `"US"`, `"Deutschland"` → `"DE"`, `"England"` → `"GB"` |
+| `is_valid_url(v)` | true for a well-formed http or https address with a real-looking host (it doesn't check the site exists) | `"https://acme.com/pricing"` → `true`, `"acme.com"` → `false` |
+| `luhn_valid(v)` | true when a number passes the Luhn check digit (cards, IMEI and many account numbers); spaces and hyphens are ignored | `"4111 1111 1111 1111"` → `true` |
 | `missing_fields(record, fields)` | the listed fields that are missing or blank | `["company", "phone"]` |
 | `completeness(record, fields)` | share of the listed fields that are filled in, 0.0 to 1.0 | `0.67` |
 
@@ -98,6 +104,12 @@ Use it when dates arrive as text in mixed formats, from spreadsheets, CSV export
 | `days_between(a, b)` | whole days from date `a` to date `b`, both YYYY-MM-DD | `days_between("2026-04-03", "2026-04-01")` → `-2` |
 | `is_leap_year(y)` | true for leap years | `2024` → `true`, `1900` → `false` |
 | `days_in_month(y, m)` | days in that month | `days_in_month(2024, 2)` → `29` |
+| `add_days_iso(date, n)` | the date `n` days later (earlier when negative); named so it doesn't clash with Neblex's own `add_days` for date values | `add_days_iso("2026-01-30", 3)` → `"2026-02-02"` |
+| `add_business_days(date, n)` | the date `n` working days (Monday to Friday) later or earlier | `add_business_days("2026-11-06", 1)` → `"2026-11-09"` (Friday to Monday) |
+| `day_of_week(date)` | 1 for Monday through 7 for Sunday | `"2026-11-09"` → `1` |
+| `iso_week(date)` | the ISO 8601 week as `YYYY-Www` | `"2027-01-01"` → `"2026-W53"` |
+| `end_of_month(date)` | the last day of that month | `"2024-02-10"` → `"2024-02-29"` |
+| `unix_to_iso(v)` | a Unix timestamp in seconds or milliseconds as an ISO date and time in UTC | `1762700400` → `"2025-11-09T15:00:00Z"` |
 
 `to_iso_date` reads, for example, `2026-04-03`, `2026/4/3`, `20260403`, `04/03/2026`, `4/3/26`, `03.04.2026`, `3 Apr 2026`, `April 3rd, 2026`, `Fri, 3-Apr-26` and `2026-04-03T10:20:00Z`. Dates that start with a four-digit year are always read as year, month, day, and a time after the date is ignored.
 
@@ -112,6 +124,8 @@ Limits:
 - An all-number date such as `04/03/2026` can't be read without knowing the source's convention, so `order` is required for those; with any other value they return `""`.
 - Two-digit years 00 to 69 become 2000 to 2069; 70 to 99 become 1970 to 1999.
 - Month names are English only. Time zones are not converted; the date is taken as written.
+- `add_business_days` doesn't know public holidays, so they count as working days. A start on a weekend counts from the nearest working day in that direction.
+- `unix_to_iso` reads values of 100,000,000,000 or more as milliseconds, so second-based timestamps work until the year 5138.
 
 ## numbers
 
@@ -123,6 +137,10 @@ Use it when amounts arrive as text: exports with thousands separators, European 
 | `parse_percent(v, decimal_sep)` | a percentage as a fraction | `"12.5%"` → `0.125` |
 | `to_cents(v, decimal_sep)` | the amount in whole cents | `"$1,234.56"` → `123456` |
 | `currency_code(v, dollar_default)` | the ISO 4217 code from a code or symbol; a plain `$` returns `dollar_default` | `"EUR 1.234,56"` → `"EUR"`, `"R$ 50"` → `"BRL"` |
+| `round_half_even(v, places)` | rounded with ties to the even digit (banker's rounding) | `round_half_even(2.345, 2)` → `2.34`, `round_half_even(2.355, 2)` → `2.36` |
+| `format_number(v, places, style)` | the number as display text; `style` is `"us"`, `"eu"`, `"fr"`, `"ch"` or `"plain"` | `format_number(1234.5, 2, "eu")` → `"1.234,50"` |
+| `percent_change(before, after)` | the change as a fraction, or `()` when `before` is 0 | `percent_change(80, 100)` → `0.25` |
+| `safe_divide(a, b, fallback)` | `a / b`, or `fallback` when `b` is 0 or a value can't be read | `safe_divide(10, 0, 0)` → `0` |
 
 ```rhai
 item.currency = currency_code(item.amount_text, "USD");
@@ -136,6 +154,35 @@ Limits:
 - With `"auto"`, a single separator followed by exactly three digits (`1,234` or `1.234`) is read as a thousands separator. If a source uses a comma for decimals with three decimal places, pass `","` instead.
 - Currency symbols, codes and units around the number are ignored; letters inside it (`12a34`) make it unreadable.
 - `to_cents` assumes two decimal places, so it doesn't fit currencies such as JPY that have none.
+- `round_half_even`, `format_number`, `percent_change` and `safe_divide` read text with `"auto"`, so `"1.005"` is read as 1005. Parse text with `parse_number` first when its separators are ambiguous.
+
+## text
+
+Use it for everyday text clean-up before values reach another system: URL slugs and match keys, display text, fixed-length codes and masked values.
+
+| Function | Returns | Example |
+|---|---|---|
+| `remove_accents(v)` | accented Latin letters in plain form | `"Müller"` → `"Muller"`, `"straße"` → `"strasse"` |
+| `slugify(v)` | lowercase, accents removed, other characters turned into single hyphens | `"Café Crème 2.0!"` → `"cafe-creme-2-0"` |
+| `truncate_words(v, max_chars)` | text cut at a space to fit `max_chars`, with `...` when cut | `truncate_words("The quick brown fox jumps", 20)` → `"The quick brown..."` |
+| `initials(v)` | the first letter of each word, uppercased | `"Mary-Jane Smith"` → `"MJS"` |
+| `mask_middle(v, keep_start, keep_end)` | the middle replaced with `*` | `mask_middle("4111111111111111", 0, 4)` → `"************1111"` |
+| `pad_left(v, width, pad)` | the value padded on the left to `width` characters | `pad_left(42, 6, "0")` → `"000042"` |
+| `strip_html(v)` | plain text from an HTML snippet, common entities decoded | `"<p>Fish &amp; Chips</p>"` → `"Fish & Chips"` |
+| `word_count(v)` | the number of words | `"The quick brown fox"` → `4` |
+
+```rhai
+item.slug = slugify(item.product_name);
+item.summary = truncate_words(strip_html(item.description), 160);
+item.card_masked = mask_middle(item.card_number, 0, 4);
+item.sku = pad_left(item.sku, 8, "0");
+```
+
+Limits:
+
+- `remove_accents` and `slugify` cover Latin letters with accents (Western, Central and Northern European); other scripts are kept as they are, and `slugify` drops them.
+- `strip_html` is for short fields such as product descriptions, not whole web pages. It decodes named entities for `& < > " '` and spaces, and numeric entities for printable ASCII; other entities are left as written.
+- `mask_middle` masks every character when a value is too short to keep both ends.
 
 ## Tests
 
@@ -143,13 +190,14 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 
 | Module | Test cases | Result in our test |
 |---|---|---|
-| data-quality | [88](data-quality/test/cases.json) | all passed |
-| dates | [43](dates/test/cases.json) | all passed |
-| numbers | [36](numbers/test/cases.json) | all passed |
+| data-quality | [119](data-quality/test/cases.json) | all passed |
+| dates | [82](dates/test/cases.json) | all passed |
+| numbers | [64](numbers/test/cases.json) | all passed |
+| text | [41](text/test/cases.json) | all passed |
 
-The dates and numbers tests ran in one Code step with all three modules imported together.
+All 306 cases ran in one Code step with the four modules imported together.
 
-The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all three loaded together. To run them yourself from the repository root, with Rust installed:
+The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all four loaded together. To run them yourself from the repository root, with Rust installed:
 
 ```sh
 cargo run --release --manifest-path test-runner/Cargo.toml

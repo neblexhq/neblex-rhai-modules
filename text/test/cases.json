@@ -1,0 +1,234 @@
+{
+ "cases": [
+  {
+   "func": "remove_accents",
+   "input": "Müller",
+   "expected": "Muller"
+  },
+  {
+   "func": "remove_accents",
+   "input": "Ærø straße",
+   "expected": "AEro strasse"
+  },
+  {
+   "func": "remove_accents",
+   "input": "Crème brûlée",
+   "expected": "Creme brulee"
+  },
+  {
+   "func": "remove_accents",
+   "input": "Łódź, Kraków",
+   "expected": "Lodz, Krakow"
+  },
+  {
+   "func": "remove_accents",
+   "input": "São Paulo",
+   "expected": "Sao Paulo"
+  },
+  {
+   "func": "remove_accents",
+   "input": "plain text 123",
+   "expected": "plain text 123"
+  },
+  {
+   "func": "remove_accents",
+   "input": 42,
+   "expected": 42
+  },
+  {
+   "func": "slugify",
+   "input": "Café Crème 2.0!",
+   "expected": "cafe-creme-2-0"
+  },
+  {
+   "func": "slugify",
+   "input": "  --Hello,   World--  ",
+   "expected": "hello-world"
+  },
+  {
+   "func": "slugify",
+   "input": "Ünïcödé Product #7",
+   "expected": "unicode-product-7"
+  },
+  {
+   "func": "slugify",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "slugify",
+   "input": 2026,
+   "expected": "2026"
+  },
+  {
+   "func": "truncate_words",
+   "input": "The quick brown fox jumps",
+   "expected": "The quick brown...",
+   "arg": 20
+  },
+  {
+   "func": "truncate_words",
+   "input": "Short",
+   "expected": "Short",
+   "arg": 10
+  },
+  {
+   "func": "truncate_words",
+   "input": "Supercalifragilistic word",
+   "expected": "Superca...",
+   "arg": 10
+  },
+  {
+   "func": "truncate_words",
+   "input": "Exactly ten",
+   "expected": "Exactly ten",
+   "arg": 11
+  },
+  {
+   "func": "truncate_words",
+   "input": "abc def",
+   "expected": "abc",
+   "arg": 3
+  },
+  {
+   "func": "initials",
+   "input": "jane ann doe",
+   "expected": "JAD"
+  },
+  {
+   "func": "initials",
+   "input": "Mary-Jane Smith",
+   "expected": "MJS"
+  },
+  {
+   "func": "initials",
+   "input": "J. R. R. Tolkien",
+   "expected": "JRRT"
+  },
+  {
+   "func": "initials",
+   "input": "  élise  durand ",
+   "expected": "ÉD"
+  },
+  {
+   "func": "initials",
+   "input": null,
+   "expected": ""
+  },
+  {
+   "func": "mask_middle",
+   "input": "4111111111111111",
+   "arg": 0,
+   "arg2": 4,
+   "expected": "************1111"
+  },
+  {
+   "func": "mask_middle",
+   "input": "jane.doe@example.com",
+   "arg": 1,
+   "arg2": 1,
+   "expected": "j******************m"
+  },
+  {
+   "func": "mask_middle",
+   "input": "123",
+   "arg": 2,
+   "arg2": 2,
+   "expected": "***"
+  },
+  {
+   "func": "mask_middle",
+   "input": 5551234,
+   "arg": 0,
+   "arg2": 4,
+   "expected": "***1234"
+  },
+  {
+   "func": "mask_middle",
+   "input": null,
+   "arg": 1,
+   "arg2": 1,
+   "expected": ""
+  },
+  {
+   "func": "pad_left",
+   "input": 42,
+   "arg": 6,
+   "arg2": "0",
+   "expected": "000042"
+  },
+  {
+   "func": "pad_left",
+   "input": "7",
+   "arg": 3,
+   "arg2": "",
+   "expected": "  7"
+  },
+  {
+   "func": "pad_left",
+   "input": "123456",
+   "arg": 4,
+   "arg2": "0",
+   "expected": "123456"
+  },
+  {
+   "func": "pad_left",
+   "input": "AB",
+   "arg": 4,
+   "arg2": "xyz",
+   "expected": "xxAB"
+  },
+  {
+   "func": "pad_left",
+   "input": null,
+   "arg": 4,
+   "arg2": "0",
+   "expected": ""
+  },
+  {
+   "func": "strip_html",
+   "input": "<p>Hello&nbsp;<b>world</b></p><br>Line two",
+   "expected": "Hello world Line two"
+  },
+  {
+   "func": "strip_html",
+   "input": "Fish &amp; Chips &lt;3 &#39;yum&#39; &#x22;ok&#x22;&#160;&#x263A;",
+   "expected": "Fish & Chips <3 'yum' \"ok\" &#x263A;"
+  },
+  {
+   "func": "strip_html",
+   "input": "No tags here",
+   "expected": "No tags here"
+  },
+  {
+   "func": "strip_html",
+   "input": "A &unknown; entity & lone ampersand",
+   "expected": "A &unknown; entity & lone ampersand"
+  },
+  {
+   "func": "word_count",
+   "input": "The quick  brown\tfox\njumps",
+   "expected": 5
+  },
+  {
+   "func": "word_count",
+   "input": "   ",
+   "expected": 0
+  },
+  {
+   "func": "word_count",
+   "input": null,
+   "expected": 0
+  },
+  {
+   "func": "word_count",
+   "input": "one",
+   "expected": 1
+  },
+  {
+   "func": "strip_html",
+   "input": "Bad &#xyz; and &#; entities",
+   "expected": "Bad &#xyz; and &#; entities"
+  }
+ ]
+}
