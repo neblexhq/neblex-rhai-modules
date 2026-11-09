@@ -17,6 +17,10 @@ let got = switch item.func {
   "fiscal_year" => fiscal_year(item.input, item.arg),
   "fiscal_quarter" => fiscal_quarter(item.input, item.arg),
   "business_days_between" => business_days_between(item.input, item.arg),
+  "add_months_iso" => add_months_iso(item.input, item.arg),
+  "months_between" => months_between(item.input, item.arg),
+  "age_in_years" => age_in_years(item.input, item.arg),
+  "start_of_week" => start_of_week(item.input, item.arg),
   _ => "unknown function"
 };
 #{ func: item.func, input: item.input, expected: item.expected, got: got, pass: got == item.expected }

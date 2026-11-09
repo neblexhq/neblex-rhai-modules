@@ -357,3 +357,51 @@ fn weekdays_after(lo, hi) {
     }
     count
 }
+
+// The date `n` months after a YYYY-MM-DD date (before it when `n` is negative). When the day doesn't
+// exist in the target month it becomes that month's last day: add_months_iso("2026-01-31", 1) ->
+// "2026-02-28". Returns "" when the date isn't valid or `n` isn't a whole number.
+fn add_months_iso(date, n) {
+    if !is_valid_iso_date(date) || type_of(n) != "i64" { return ""; }
+    let y = parse_int(date.sub_string(0, 4));
+    let m = parse_int(date.sub_string(5, 2));
+    let d = parse_int(date.sub_string(8, 2));
+    let total = y * 12 + (m - 1) + n;
+    if total < 12 { return ""; }
+    let ny = total / 12;
+    let nm = total % 12 + 1;
+    let last = days_in_month(ny, nm);
+    iso_from_parts(ny, nm, if d > last { last } else { d })
+}
+
+// Whole months from date a to date b (negative when b is earlier), counted so that
+// add_months_iso(a, n) never passes b: "2026-01-31" to "2026-02-28" is 1, "2026-01-15" to
+// "2026-02-14" is 0. Returns () when either date isn't valid.
+fn months_between(a, b) {
+    if !is_valid_iso_date(a) || !is_valid_iso_date(b) { return (); }
+    let n = (parse_int(b.sub_string(0, 4)) * 12 + parse_int(b.sub_string(5, 2)))
+          - (parse_int(a.sub_string(0, 4)) * 12 + parse_int(a.sub_string(5, 2)));
+    if b >= a {
+        if add_months_iso(a, n) > b { n -= 1; }
+    } else {
+        if add_months_iso(a, n) < b { n += 1; }
+    }
+    n
+}
+
+// Age in whole years on `as_of` for someone born on `birth_date` (both YYYY-MM-DD). Someone born on
+// 29 February turns a year older on 28 February in non-leap years. Returns () when a date isn't
+// valid or `as_of` is before the birth date.
+fn age_in_years(birth_date, as_of) {
+    if !is_valid_iso_date(birth_date) || !is_valid_iso_date(as_of) || as_of < birth_date { return (); }
+    months_between(birth_date, as_of) / 12
+}
+
+// The first day of the week that contains a YYYY-MM-DD date, for weeks starting on `first_day`
+// (1 = Monday ... 7 = Sunday): start_of_week("2026-11-12", 1) -> "2026-11-09".
+// Returns "" when the date or `first_day` isn't valid.
+fn start_of_week(date, first_day) {
+    if !is_valid_iso_date(date) || type_of(first_day) != "i64" || first_day < 1 || first_day > 7 { return ""; }
+    let offset = (day_of_week(date) - first_day + 7) % 7;
+    date_from_days(iso_to_days(date) - offset)
+}

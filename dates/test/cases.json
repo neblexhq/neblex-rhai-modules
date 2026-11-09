@@ -593,6 +593,162 @@
    "input": "bad",
    "arg": "2026-11-09",
    "expected": null
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2026-01-31",
+   "arg": 1,
+   "expected": "2026-02-28"
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2024-01-31",
+   "arg": 1,
+   "expected": "2024-02-29"
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2026-11-09",
+   "arg": 3,
+   "expected": "2027-02-09"
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2026-03-31",
+   "arg": -3,
+   "expected": "2025-12-31"
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2026-05-15",
+   "arg": 0,
+   "expected": "2026-05-15"
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2026-02-30",
+   "arg": 1,
+   "expected": ""
+  },
+  {
+   "func": "add_months_iso",
+   "input": "2026-01-01",
+   "arg": "1",
+   "expected": ""
+  },
+  {
+   "func": "months_between",
+   "input": "2026-01-31",
+   "arg": "2026-02-28",
+   "expected": 1
+  },
+  {
+   "func": "months_between",
+   "input": "2026-01-15",
+   "arg": "2026-02-14",
+   "expected": 0
+  },
+  {
+   "func": "months_between",
+   "input": "2026-01-15",
+   "arg": "2026-02-15",
+   "expected": 1
+  },
+  {
+   "func": "months_between",
+   "input": "2025-11-09",
+   "arg": "2026-11-09",
+   "expected": 12
+  },
+  {
+   "func": "months_between",
+   "input": "2026-11-09",
+   "arg": "2026-08-09",
+   "expected": -3
+  },
+  {
+   "func": "months_between",
+   "input": "2026-11-09",
+   "arg": "2026-08-10",
+   "expected": -2
+  },
+  {
+   "func": "months_between",
+   "input": "bad",
+   "arg": "2026-01-01",
+   "expected": null
+  },
+  {
+   "func": "age_in_years",
+   "input": "1990-05-20",
+   "arg": "2026-11-09",
+   "expected": 36
+  },
+  {
+   "func": "age_in_years",
+   "input": "1990-11-10",
+   "arg": "2026-11-09",
+   "expected": 35
+  },
+  {
+   "func": "age_in_years",
+   "input": "2000-02-29",
+   "arg": "2026-02-27",
+   "expected": 25
+  },
+  {
+   "func": "age_in_years",
+   "input": "2000-02-29",
+   "arg": "2026-02-28",
+   "expected": 26
+  },
+  {
+   "func": "age_in_years",
+   "input": "2026-11-10",
+   "arg": "2026-11-09",
+   "expected": null
+  },
+  {
+   "func": "age_in_years",
+   "input": "x",
+   "arg": "2026-11-09",
+   "expected": null
+  },
+  {
+   "func": "start_of_week",
+   "input": "2026-11-12",
+   "arg": 1,
+   "expected": "2026-11-09"
+  },
+  {
+   "func": "start_of_week",
+   "input": "2026-11-09",
+   "arg": 1,
+   "expected": "2026-11-09"
+  },
+  {
+   "func": "start_of_week",
+   "input": "2026-11-12",
+   "arg": 7,
+   "expected": "2026-11-08"
+  },
+  {
+   "func": "start_of_week",
+   "input": "2026-11-15",
+   "arg": 7,
+   "expected": "2026-11-15"
+  },
+  {
+   "func": "start_of_week",
+   "input": "2026-11-15",
+   "arg": 1,
+   "expected": "2026-11-09"
+  },
+  {
+   "func": "start_of_week",
+   "input": "2026-11-12",
+   "arg": 0,
+   "expected": ""
   }
  ]
 }

@@ -7,11 +7,11 @@ Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) funct
 | Module | What it does |
 |---|---|
 | [data-quality](data-quality/data-quality.rhai) | Cleans and checks contact and company records: emails (including disposable addresses), phone numbers, names, company names, domains, URLs, US ZIP codes and states, Canadian and UK postcodes, country codes, Luhn check digits and missing fields |
-| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week, end of month, quarter and fiscal year and quarter |
+| [dates](dates/dates.rhai) | Reads dates written in common formats into YYYY-MM-DD, converts Excel serial dates and Unix timestamps, counts and adds days and working days, and gives the weekday, ISO week, end of month, quarter, fiscal year and quarter, months and ages |
 | [numbers](numbers/numbers.rhai) | Reads numbers and amounts written in US or European formats, percentages and currency codes; banker's rounding, display formatting, percent change, safe division and durations |
 | [text](text/text.rhai) | Everyday text clean-up: remove accents, slugs, truncate at a word, initials, mask the middle of a value, left-pad codes, strip HTML snippets, count words, and title, snake and camel case |
 
-61 functions in all.
+65 functions in all.
 
 Each module stands alone, and a Code step can import several of them at once.
 
@@ -117,6 +117,10 @@ Use it when dates arrive as text in mixed formats, from spreadsheets, CSV export
 | `quarter(date)` | the calendar quarter, 1 to 4 | `"2026-11-09"` → `4` |
 | `fiscal_year(date, start_month)` | the fiscal year, named by the calendar year it ends in | `fiscal_year("2026-11-09", 10)` → `2027` |
 | `fiscal_quarter(date, start_month)` | the quarter within that fiscal year | `fiscal_quarter("2026-11-09", 10)` → `1` |
+| `add_months_iso(date, n)` | the date `n` months later or earlier; a day the month doesn't have becomes its last day | `add_months_iso("2026-01-31", 1)` → `"2026-02-28"` |
+| `months_between(a, b)` | whole months from `a` to `b`, counted the way `add_months_iso` steps | `months_between("2026-01-15", "2026-02-14")` → `0` |
+| `age_in_years(birth_date, as_of)` | age in whole years on a date | `age_in_years("1990-05-20", "2026-11-09")` → `36` |
+| `start_of_week(date, first_day)` | the first day of that week; `first_day` is 1 (Monday) to 7 (Sunday) | `start_of_week("2026-11-12", 1)` → `"2026-11-09"` |
 
 `to_iso_date` reads, for example, `2026-04-03`, `2026/4/3`, `20260403`, `04/03/2026`, `4/3/26`, `03.04.2026`, `3 Apr 2026`, `April 3rd, 2026`, `Fri, 3-Apr-26` and `2026-04-03T10:20:00Z`. Dates that start with a four-digit year are always read as year, month, day, and a time after the date is ignored.
 
@@ -133,6 +137,7 @@ Limits:
 - Month names are English only. Time zones are not converted; the date is taken as written.
 - `add_business_days` doesn't know public holidays, so they count as working days. A start on a weekend counts from the nearest working day in that direction.
 - `unix_to_iso` reads values of 100,000,000,000 or more as milliseconds, so second-based timestamps work until the year 5138.
+- `age_in_years` treats a 29 February birthday as 28 February in non-leap years; some jurisdictions use 1 March.
 - `fiscal_year` names a fiscal year by the calendar year it ends in, the most common convention. If yours is named by the year it starts in, subtract 1 when `start_month` isn't 1.
 
 ## numbers
@@ -205,11 +210,11 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 | Module | Test cases | Result in our test |
 |---|---|---|
 | data-quality | [143](data-quality/test/cases.json) | all passed |
-| dates | [106](dates/test/cases.json) | all passed |
+| dates | [132](dates/test/cases.json) | all passed |
 | numbers | [89](numbers/test/cases.json) | all passed |
 | text | [57](text/test/cases.json) | all passed |
 
-All 395 cases pass in a Code step with the four modules imported together.
+All 421 cases pass in a Code step with the four modules imported together.
 
 The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all four loaded together. To run them yourself from the repository root, with Rust installed:
 
