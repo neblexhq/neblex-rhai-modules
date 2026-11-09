@@ -1,0 +1,23 @@
+# Runs every module's test cases (<module>/test/cases.json) with the Rhai engine on each push
+# and pull request: each module on its own, then all modules loaded together.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal
+
+      - name: Run the test cases
+        run: cargo run --release --locked --manifest-path test-runner/Cargo.toml

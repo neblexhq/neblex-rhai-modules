@@ -1,0 +1,9 @@
+[package]
+name = "rhai-test-runner"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+rhai = { version = "1", features = ["serde"] }
+serde_json = "1"

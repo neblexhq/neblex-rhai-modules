@@ -1,5 +1,7 @@
 # Neblex Rhai modules
 
+[![Tests](https://github.com/neblexhq/neblex-rhai-modules/actions/workflows/test.yml/badge.svg)](https://github.com/neblexhq/neblex-rhai-modules/actions/workflows/test.yml)
+
 Reusable [Rhai](https://www.neblex.com/integration-fabric/docs/guide/rhai) functions for [Neblex Integration Fabric](https://www.neblex.com/integration-fabric) flows. A module is a set of plain functions that a Code step imports by name. Rhai runs in a sandbox with no file, network or system access, so a module can only transform the values it's given.
 
 | Module | What it does |
@@ -146,6 +148,14 @@ Each module has a `test` folder with `cases.json` (test cases, each with an inpu
 | numbers | [36](numbers/test/cases.json) | all passed |
 
 The dates and numbers tests ran in one Code step with all three modules imported together.
+
+The same cases also run automatically on every change with the [Rhai](https://rhai.rs) engine (`test-runner/`), each module on its own and all three loaded together. To run them yourself from the repository root, with Rust installed:
+
+```sh
+cargo run --release --manifest-path test-runner/Cargo.toml
+```
+
+Neblex runs Rhai in its own sandbox, so the result in a Neblex flow is the one that counts; the automated run catches mistakes before a change reaches it.
 
 ## Links
 
